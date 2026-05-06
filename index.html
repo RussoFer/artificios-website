@@ -1,0 +1,1469 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Artificios · 80's Tribute Band</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Monoton&family=Orbitron:wght@500;700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============ TOKENS ============ */
+:root{
+  --ink:#05010f;
+  --ink-2:#0d0622;
+  --ink-3:#17093a;
+  --paper:#fef6ff;
+  --pink:#ff2a8a;
+  --pink-2:#ff6ec7;
+  --cyan:#22e8ff;
+  --cyan-2:#8bf6ff;
+  --violet:#6a2bff;
+  --sun-1:#ffd86b;
+  --sun-2:#ff5ea8;
+  --sun-3:#6a2bff;
+  --grid: rgba(255, 42, 138, .55);
+  --scan: rgba(34, 232, 255, .06);
+}
+
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background: var(--ink);
+  color: var(--paper);
+  font-family: 'Inter', system-ui, sans-serif;
+  font-weight: 400;
+  line-height: 1.6;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Scanline overlay across entire page */
+body::before{
+  content:"";
+  position: fixed; inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 3px,
+    var(--scan) 3px,
+    var(--scan) 4px
+  );
+  mix-blend-mode: screen;
+  z-index: 200;
+}
+
+::selection{background:var(--pink);color:var(--ink)}
+
+/* ============ TYPE UTILS ============ */
+.eyebrow{
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: .32em;
+  text-transform: uppercase;
+  color: var(--cyan);
+  display:inline-flex; align-items:center; gap:10px;
+}
+.eyebrow::before{
+  content:""; width:28px; height:1px; background: var(--cyan);
+}
+
+h1,h2,h3{margin:0; font-weight:900; letter-spacing:-.01em}
+.mono{font-family:'Orbitron', sans-serif; letter-spacing:.04em}
+.neon{
+  font-family:'Monoton', cursive;
+  font-weight:400;
+  letter-spacing:.02em;
+  color: #fff;
+  text-shadow:
+    0 0 4px #fff,
+    0 0 14px var(--pink),
+    0 0 34px var(--pink),
+    0 0 70px var(--pink-2),
+    0 0 110px rgba(255,42,138,.45);
+}
+.neon.cyan{
+  text-shadow:
+    0 0 4px #fff,
+    0 0 14px var(--cyan),
+    0 0 34px var(--cyan),
+    0 0 70px var(--cyan-2);
+}
+
+/* ============ NAV ============ */
+.nav{
+  position: fixed; top:0; left:0; right:0;
+  z-index: 150;
+  display:flex; align-items:center; justify-content:space-between;
+  padding: 22px clamp(20px, 5vw, 72px);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  background: linear-gradient(180deg, rgba(5,1,15,.72), rgba(5,1,15,.38));
+  border-bottom: 1px solid rgba(255,42,138,.18);
+}
+.brand{display:flex; align-items:center; gap:12px; text-decoration:none; color:#fff}
+.brand-mark{
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 50% 35%, var(--sun-1), var(--sun-2) 45%, var(--sun-3) 90%);
+  position: relative;
+  box-shadow: 0 0 22px rgba(255,110,199,.7), inset 0 -6px 14px rgba(0,0,0,.3);
+}
+.brand-mark::after{
+  content:"";
+  position:absolute; left:0; right:0; top:50%; height:50%;
+  background:
+    linear-gradient(transparent 0, transparent 38%, var(--ink) 38%, var(--ink) 46%, transparent 46%, transparent 64%, var(--ink) 64%, var(--ink) 70%, transparent 70%, transparent 86%, var(--ink) 86%, var(--ink) 90%, transparent 90%);
+  border-radius: 0 0 50% 50% / 0 0 100% 100%;
+}
+.brand-name{
+  font-family:'Orbitron', sans-serif; font-weight:900;
+  letter-spacing:.18em; font-size:14px;
+}
+.nav-links{display:flex; gap:28px; list-style:none; margin:0; padding:0}
+.nav-links a{
+  color:#e7d9ff; text-decoration:none;
+  font-family:'Orbitron', sans-serif; font-weight:500; font-size:12px;
+  letter-spacing:.18em; text-transform:uppercase;
+  transition: color .2s, text-shadow .2s;
+}
+.nav-links a:hover{color:#fff; text-shadow:0 0 10px var(--cyan)}
+.cta{
+  display:inline-flex; align-items:center; gap:10px;
+  padding: 11px 22px;
+  border-radius: 999px;
+  background: linear-gradient(92deg, var(--pink), var(--violet));
+  color:#fff; font-family:'Orbitron', sans-serif;
+  font-weight:700; font-size:12px; letter-spacing:.18em; text-transform:uppercase;
+  text-decoration:none;
+  box-shadow: 0 10px 30px rgba(255,42,138,.35), 0 0 0 1px rgba(255,255,255,.12) inset;
+  transition: transform .18s, box-shadow .18s;
+  white-space:nowrap;
+}
+.cta:hover{transform: translateY(-1px); box-shadow: 0 14px 36px rgba(255,42,138,.55), 0 0 0 1px rgba(255,255,255,.2) inset}
+.cta.ghost{
+  background: transparent;
+  border:1px solid rgba(34,232,255,.5);
+  color: var(--cyan);
+  box-shadow: none;
+}
+.cta.ghost:hover{background: rgba(34,232,255,.08); color:#fff}
+
+.nav-mobile{display:none}
+
+/* ============ HERO ============ */
+.hero{
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+  display:flex; align-items:center; justify-content:center;
+  isolation: isolate;
+  padding-top: 120px;   /* breathing room below the fixed nav so parallax layers are visible */
+}
+/* A slim band of pure sky between the nav and the hero stage, so the parallax
+   stars/sun read clearly as they drift beneath the nav blur. */
+.hero-gap{
+  position:absolute;
+  left:0; right:0; top:0;
+  height: 140px;
+  background: linear-gradient(180deg, rgba(5,1,15,.35) 0%, transparent 100%);
+  z-index: -1;
+  pointer-events:none;
+}
+.hero-sky{
+  position:absolute; inset:0 0 48% 0;
+  background:
+    radial-gradient(ellipse 120% 80% at 50% 100%, rgba(255,110,199,.35), transparent 60%),
+    linear-gradient(180deg, #0a0418 0%, #1a0542 40%, #49126e 75%, #b02c8a 100%);
+  z-index:-3;
+}
+.hero-stars{
+  position:absolute; inset:0 0 52% 0;
+  background-image:
+    radial-gradient(1px 1px at 12% 18%, #fff, transparent),
+    radial-gradient(1px 1px at 28% 42%, #fff, transparent),
+    radial-gradient(1px 1px at 44% 12%, #fff, transparent),
+    radial-gradient(1.5px 1.5px at 63% 28%, #fff, transparent),
+    radial-gradient(1px 1px at 78% 8%, #fff, transparent),
+    radial-gradient(1px 1px at 88% 34%, #fff, transparent),
+    radial-gradient(1px 1px at 6% 48%, #fff, transparent),
+    radial-gradient(1.5px 1.5px at 55% 50%, #fff, transparent),
+    radial-gradient(1px 1px at 20% 26%, var(--cyan-2), transparent),
+    radial-gradient(1px 1px at 72% 18%, var(--pink-2), transparent);
+  opacity:.8;
+  z-index:-2;
+  will-change: transform;
+}
+.hero-sun{
+  position:absolute;
+  left:50%; bottom:44%;
+  width: min(640px, 90vw);
+  aspect-ratio:1;
+  transform: translate(-50%, 50%);
+  z-index:-2;
+  will-change: transform;
+}
+.hero-sun::before{
+  content:"";
+  position:absolute; inset:0;
+  border-radius: 50%;
+  background: linear-gradient(180deg, var(--sun-1) 0%, var(--sun-2) 55%, var(--sun-3) 100%);
+  filter: drop-shadow(0 0 80px rgba(255,110,199,.6));
+}
+.hero-sun::after{
+  content:"";
+  position:absolute; inset:0;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0, transparent 52%,
+    var(--ink) 52%, var(--ink) 55%,
+    transparent 55%, transparent 62%,
+    var(--ink) 62%, var(--ink) 64%,
+    transparent 64%, transparent 72%,
+    var(--ink) 72%, var(--ink) 73.5%,
+    transparent 73.5%, transparent 82%,
+    var(--ink) 82%, var(--ink) 83%,
+    transparent 83%
+  );
+  mix-blend-mode: normal;
+}
+.hero-grid{
+  position:absolute;
+  left:-10%; right:-10%; bottom:0;
+  height: 52%;
+  background: linear-gradient(180deg, #1a0542 0%, #05010f 70%);
+  z-index:-2;
+  perspective: 600px;
+  overflow:hidden;
+}
+.hero-grid::before{
+  content:"";
+  position:absolute;
+  left:50%; top:0;
+  width: 220%;
+  height: 260%;
+  transform-origin: top center;
+  transform: translate(-50%, 0) rotateX(62deg);
+  background-image:
+    linear-gradient(to right, var(--grid) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid) 1px, transparent 1px);
+  background-size: 72px 72px;
+  will-change: transform, background-position;
+  animation: gridmove 2.2s linear infinite;
+}
+@keyframes gridmove{
+  from{background-position: 0 0, 0 0}
+  to  {background-position: 0 72px, 0 72px}
+}
+.hero-mountains{
+  position:absolute; left:0; right:0; bottom: 52%;
+  height: 160px;
+  z-index:-2;
+  pointer-events:none;
+}
+
+.hero-inner{
+  position:relative;
+  z-index: 2;
+  text-align:center;
+  padding: 120px 24px 140px;
+  width: 100%;
+  max-width: 1200px;
+}
+.hero-eyebrow{
+  display:inline-block;
+  padding: 7px 16px;
+  border: 1px solid rgba(34,232,255,.5);
+  border-radius: 999px;
+  font-family:'Orbitron', sans-serif;
+  font-size: 11px; letter-spacing:.4em; text-transform:uppercase;
+  color: var(--cyan);
+  background: rgba(5,1,15,.4);
+  backdrop-filter: blur(6px);
+  margin-bottom: 26px;
+}
+.hero-title{
+  position: relative;
+  display: inline-block;
+  margin: 0 0 20px;
+  isolation: isolate;
+}
+/* Electric arc halo behind the text */
+.hero-title::before{
+  content:"";
+  position:absolute;
+  left:-8%; right:-8%; top:-12%; bottom:-12%;
+  background:
+    radial-gradient(ellipse 60% 40% at 30% 50%, rgba(34,232,255,.35), transparent 60%),
+    radial-gradient(ellipse 60% 40% at 70% 50%, rgba(255,42,138,.45), transparent 60%);
+  filter: blur(20px);
+  z-index:-1;
+  animation: haloPulse 3.6s ease-in-out infinite;
+}
+@keyframes haloPulse{
+  0%,100%{opacity:.7; transform: scale(1)}
+  50%{opacity:1; transform: scale(1.06)}
+}
+.hero h1{
+  font-family:'Monoton', cursive;
+  font-weight: 400;
+  font-size: clamp(64px, 14vw, 220px);
+  line-height: .9;
+  letter-spacing: .02em;
+  margin: 0;
+  color: #fff;
+  position: relative;
+  text-shadow:
+    0 0 6px #fff,
+    0 0 18px var(--pink),
+    0 0 40px var(--pink),
+    0 0 80px var(--pink-2),
+    0 0 140px rgba(255,42,138,.5);
+  animation: neonBreathe 7s ease-in-out infinite, neonHue 14s ease-in-out infinite;
+}
+/* Smooth neon breathing — glow swells & shifts pink↔cyan, with one soft blink */
+@keyframes neonBreathe{
+  0%{
+    opacity:.96;
+    text-shadow:
+      0 0 6px #fff,
+      0 0 18px var(--pink),
+      0 0 40px var(--pink),
+      0 0 80px var(--pink-2),
+      0 0 140px rgba(255,42,138,.45);
+  }
+  40%{
+    opacity:1;
+    text-shadow:
+      0 0 10px #fff,
+      0 0 28px var(--cyan),
+      0 0 60px var(--cyan),
+      0 0 110px var(--cyan-2),
+      0 0 180px rgba(34,232,255,.45);
+  }
+  55%{opacity:.78}
+  58%{opacity:1}
+  100%{
+    opacity:.96;
+    text-shadow:
+      0 0 6px #fff,
+      0 0 18px var(--pink),
+      0 0 40px var(--pink),
+      0 0 80px var(--pink-2),
+      0 0 140px rgba(255,42,138,.45);
+  }
+}
+/* Slow color-shift between pink and cyan as accents */
+@keyframes neonHue{
+  0%,100%{filter: hue-rotate(0deg)}
+  50%{filter: hue-rotate(-20deg)}
+}
+
+/* Electric arc SVG — animated stroke-dashoffset */
+.hero-arc{
+  position:absolute;
+  left:-10%; right:-10%; top:-30%; bottom:-30%;
+  width:120%; height:160%;
+  pointer-events:none;
+  z-index:-1;
+  opacity:.55;
+}
+.hero-arc path{
+  fill:none;
+  stroke: var(--cyan);
+  stroke-width: 1.2;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 4px var(--cyan)) drop-shadow(0 0 10px var(--cyan-2));
+  stroke-dasharray: 8 40;
+  animation: arcZap 4s linear infinite;
+}
+.hero-arc path:nth-child(2){
+  stroke: var(--pink-2);
+  filter: drop-shadow(0 0 4px var(--pink-2)) drop-shadow(0 0 10px var(--pink));
+  animation-duration: 5.2s;
+  animation-delay: -1.3s;
+  stroke-dasharray: 6 50;
+}
+.hero-arc path:nth-child(3){
+  stroke: #fff;
+  filter: drop-shadow(0 0 4px #fff) drop-shadow(0 0 10px var(--cyan));
+  animation-duration: 3.4s;
+  animation-delay: -0.8s;
+  stroke-dasharray: 4 60;
+  opacity: .7;
+}
+@keyframes arcZap{
+  from{stroke-dashoffset: 0}
+  to  {stroke-dashoffset: -260}
+}
+
+/* Occasional lightning flash over the hero */
+.hero-flash{
+  position:absolute; inset:0;
+  background: radial-gradient(ellipse at 50% 35%, rgba(255,255,255,.55), rgba(34,232,255,.25) 40%, transparent 70%);
+  opacity:0;
+  pointer-events:none;
+  z-index: 1;
+  mix-blend-mode: screen;
+  animation: lightningFlash 11s steps(1,end) infinite;
+}
+@keyframes lightningFlash{
+  0%, 94%, 100%{opacity:0}
+  95%{opacity:.5}
+  96%{opacity:0}
+}
+@media (prefers-reduced-motion: reduce){
+  .hero h1{animation:none}
+  .hero-arc path{animation:none; stroke-dasharray:none}
+  .hero-title::before{animation:none}
+  .hero-flash{animation:none}
+}
+.hero-sub{
+  font-family:'Orbitron', sans-serif;
+  font-weight: 500;
+  font-size: clamp(14px, 1.6vw, 18px);
+  letter-spacing: .3em;
+  text-transform: uppercase;
+  color: #fff;
+  margin: 0 0 36px;
+  opacity:.92;
+}
+.hero-sub .sep{color: var(--cyan); margin: 0 14px}
+.hero-ctas{display:flex; gap:14px; justify-content:center; flex-wrap:wrap}
+.hero-meta{
+  position:absolute;
+  left: clamp(20px, 5vw, 72px); right: clamp(20px, 5vw, 72px);
+  bottom: 34px;
+  display:flex; justify-content:space-between; align-items:flex-end;
+  z-index: 3;
+  font-family:'Orbitron', sans-serif;
+  font-size: 11px; letter-spacing:.26em; text-transform:uppercase;
+  color: rgba(255,255,255,.72);
+  gap:16px;
+}
+.hero-meta .val{color:#fff; display:block; font-size:22px; letter-spacing:.02em; font-weight:700; margin-top:4px;
+  text-shadow: 0 0 10px var(--cyan);
+}
+
+/* ============ SECTION CHROME ============ */
+section{padding: clamp(80px, 12vw, 140px) clamp(20px, 5vw, 72px); position:relative}
+.section-head{
+  max-width: 1200px; margin: 0 auto 56px;
+  display:grid; grid-template-columns: 1fr auto; gap: 28px; align-items:end;
+}
+.section-head h2{
+  font-family:'Orbitron', sans-serif;
+  font-weight: 900;
+  font-size: clamp(40px, 6vw, 76px);
+  line-height: 1;
+  letter-spacing:-.02em;
+  color:#fff;
+}
+.section-head h2 em{font-style:normal; color: var(--pink); text-shadow: 0 0 30px rgba(255,42,138,.6)}
+.section-head h2 em.cyan{color: var(--cyan); text-shadow: 0 0 30px rgba(34,232,255,.6)}
+.section-head .lead{
+  color: #d8c9f0; font-size: 17px; max-width: 380px;
+  line-height: 1.55;
+}
+
+/* ============ SERVICES ============ */
+.services{
+  background: var(--ink);
+  position:relative;
+}
+.services::before{
+  content:"";
+  position:absolute; inset:0;
+  background:
+    radial-gradient(circle at 8% 20%, rgba(106,43,255,.22), transparent 40%),
+    radial-gradient(circle at 92% 85%, rgba(255,42,138,.18), transparent 40%);
+  pointer-events:none;
+}
+.svc-grid{
+  position:relative;
+  max-width: 1200px; margin:0 auto;
+  display:grid; grid-template-columns: repeat(3, 1fr); gap: 22px;
+}
+.svc{
+  position:relative;
+  padding: 32px 28px 30px;
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,.01));
+  border:1px solid rgba(255,42,138,.22);
+  overflow:hidden;
+  transition: transform .25s, border-color .25s, box-shadow .25s;
+}
+.svc::before{
+  content:"";
+  position:absolute; inset:-1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, transparent 30%, rgba(34,232,255,.6) 50%, transparent 70%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude;
+  opacity:0; transition: opacity .3s;
+  pointer-events:none;
+}
+.svc:hover{
+  transform: translateY(-4px);
+  border-color: rgba(34,232,255,.5);
+  box-shadow: 0 20px 50px rgba(106,43,255,.25);
+}
+.svc:hover::before{opacity:1}
+.svc-num{
+  font-family:'Orbitron', sans-serif; font-weight:900;
+  font-size: 14px; letter-spacing:.24em;
+  color: var(--cyan);
+  margin-bottom: 22px;
+  display:flex; align-items:center; gap:12px;
+}
+.svc-num::after{content:""; flex:1; height:1px; background: linear-gradient(to right, rgba(34,232,255,.5), transparent)}
+.svc h3{
+  font-family:'Orbitron', sans-serif;
+  font-weight: 900;
+  font-size: 26px;
+  line-height: 1.05;
+  color:#fff;
+  margin-bottom: 14px;
+  letter-spacing:-.01em;
+}
+.svc p{color:#cbb9e7; font-size: 15px; line-height:1.6; margin: 0 0 22px}
+.svc-tags{display:flex; flex-wrap:wrap; gap:6px}
+.tag{
+  font-family:'Orbitron', sans-serif; font-weight:500;
+  font-size: 10px; letter-spacing:.18em; text-transform: uppercase;
+  padding: 5px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.14);
+  background: rgba(255,255,255,.04);
+  color: #e7d9ff;
+}
+
+/* ============ STATS STRIP ============ */
+.stats{
+  padding: 60px clamp(20px, 5vw, 72px);
+  background: linear-gradient(92deg, rgba(255,42,138,.12), rgba(34,232,255,.1));
+  border-top:1px solid rgba(255,42,138,.25);
+  border-bottom:1px solid rgba(34,232,255,.25);
+}
+.stats-inner{
+  max-width: 1200px; margin:0 auto;
+  display:grid; grid-template-columns: repeat(4, 1fr); gap: 24px;
+  text-align:left;
+}
+.stat{border-left: 1px solid rgba(255,255,255,.1); padding-left: 18px}
+.stat:first-child{border-left: none; padding-left:0}
+.stat .num{
+  font-family:'Monoton', cursive;
+  font-size: clamp(36px, 5vw, 58px);
+  line-height:1;
+  color:#fff;
+  text-shadow: 0 0 18px var(--pink), 0 0 40px rgba(255,42,138,.5);
+  margin-bottom: 8px;
+}
+.stat .num.cyan{text-shadow: 0 0 18px var(--cyan), 0 0 40px rgba(34,232,255,.5)}
+.stat .lbl{
+  font-family:'Orbitron', sans-serif; font-weight:500;
+  font-size: 11px; letter-spacing:.24em; text-transform: uppercase;
+  color:#e7d9ff;
+}
+
+/* ============ SETLIST ============ */
+.setlist{background: var(--ink-2); position:relative; overflow:hidden}
+.setlist::before{
+  content:"";
+  position:absolute; right:-20%; top:-20%;
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(34,232,255,.14), transparent 60%);
+  pointer-events:none;
+}
+.setlist-wrap{max-width:1200px; margin:0 auto; position:relative}
+.setlist-head{
+  display:flex; align-items:end; justify-content:space-between;
+  margin-bottom: 36px; gap: 28px; flex-wrap:wrap;
+}
+.setlist-filters{display:flex; gap:8px; flex-wrap:wrap}
+.filter{
+  font-family:'Orbitron', sans-serif; font-weight:500;
+  font-size: 11px; letter-spacing:.22em; text-transform: uppercase;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.16);
+  background: rgba(255,255,255,.03);
+  color: #e7d9ff;
+  cursor:pointer;
+  transition: all .2s;
+}
+.filter.active{
+  background: linear-gradient(92deg, var(--pink), var(--violet));
+  border-color: transparent;
+  color:#fff;
+  box-shadow: 0 0 20px rgba(255,42,138,.45);
+}
+.filter:hover:not(.active){border-color: var(--cyan); color:#fff}
+
+.setlist-table{
+  border-top: 1px solid rgba(255,42,138,.3);
+}
+.song{
+  display:grid;
+  grid-template-columns: 60px 2fr 1.3fr 80px 100px;
+  gap: 20px;
+  padding: 20px 12px;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+  align-items:center;
+  transition: background .2s, padding .2s;
+  cursor:pointer;
+}
+.song:hover{background: rgba(255,42,138,.06); padding-left: 20px}
+.song .idx{
+  font-family:'Orbitron', sans-serif; font-weight:700;
+  color: var(--cyan); font-size: 13px; letter-spacing:.18em;
+}
+.song .title{
+  font-family:'Orbitron', sans-serif; font-weight:700;
+  color:#fff; font-size: 17px; letter-spacing:-.01em;
+}
+.song .artist{
+  color:#cbb9e7; font-size: 14px; font-weight:400;
+}
+.song .year{
+  font-family:'Orbitron', sans-serif; font-weight:500;
+  color:#8f7bb0; font-size: 12px; letter-spacing:.14em;
+  text-align:right;
+}
+.song .vibe{
+  justify-self:end;
+  font-family:'Orbitron', sans-serif; font-weight:500;
+  font-size: 10px; letter-spacing:.18em; text-transform: uppercase;
+  padding: 5px 10px;
+  border-radius: 999px;
+  color: var(--cyan);
+  border: 1px solid rgba(34,232,255,.4);
+}
+.song .vibe.pink{color: var(--pink-2); border-color: rgba(255,110,199,.5)}
+.song .vibe.sun{color: var(--sun-1); border-color: rgba(255,216,107,.5)}
+
+.setlist-foot{
+  display:flex; justify-content:space-between; align-items:center;
+  margin-top: 28px; color:#8f7bb0; font-size:14px;
+  flex-wrap:wrap; gap:16px;
+}
+.setlist-foot .count{color:var(--cyan); font-family:'Orbitron', sans-serif; font-weight:700; letter-spacing:.1em}
+
+/* ============ GALLERY ============ */
+.gallery{background: var(--ink); position:relative}
+.gallery-grid{
+  max-width:1400px; margin: 0 auto;
+  display:grid;
+  grid-template-columns: repeat(12, 1fr);
+  grid-auto-rows: 160px;
+  gap: 16px;
+}
+.ph{
+  position:relative; overflow:hidden; border-radius: 14px;
+  border: 1px solid rgba(255,255,255,.08);
+  background: var(--ink-3);
+  transition: transform .3s, border-color .3s;
+}
+.ph img{
+  position:absolute; inset:0;
+  width:100%; height:100%;
+  object-fit: cover;
+  display:block;
+  transition: transform .6s ease;
+}
+.ph:hover img{transform: scale(1.04)}
+.ph:hover{transform: scale(1.02); border-color: var(--pink)}
+.ph::after{
+  content:"";
+  position:absolute; inset:0;
+  background: linear-gradient(180deg, transparent 50%, rgba(5,1,15,.85) 100%);
+  pointer-events:none;
+}
+.ph-label{
+  position:absolute; bottom: 14px; left: 16px; right: 16px;
+  z-index: 2;
+  display:flex; justify-content:space-between; align-items:end;
+  font-family:'Orbitron', sans-serif;
+  font-size: 11px; letter-spacing:.2em; text-transform: uppercase;
+  color:#fff;
+}
+.ph-label .tag-sm{color:var(--cyan)}
+.ph-1{grid-column: span 7; grid-row: span 3; background:
+  linear-gradient(135deg, #6a2bff, #ff2a8a, #ffd86b);
+}
+.ph-2{grid-column: span 5; grid-row: span 2; background:
+  linear-gradient(135deg, #22e8ff, #6a2bff);
+}
+.ph-3{grid-column: span 5; grid-row: span 1; background:
+  linear-gradient(135deg, #ff2a8a, #49126e);
+}
+.ph-4{grid-column: span 4; grid-row: span 2; background:
+  linear-gradient(135deg, #ffd86b, #ff2a8a);
+}
+.ph-5{grid-column: span 4; grid-row: span 2; background:
+  linear-gradient(135deg, #22e8ff, #ff6ec7);
+}
+.ph-6{grid-column: span 4; grid-row: span 2; background:
+  linear-gradient(135deg, #49126e, #22e8ff);
+}
+
+/* Fake band silhouette inside photo placeholders */
+.ph-silhouette{
+  position:absolute; inset: 0;
+  display:flex; align-items:flex-end; justify-content: center;
+  gap: 6%;
+  padding: 14% 8% 0;
+  opacity: .82;
+}
+.ph-silhouette i{
+  display:block;
+  width: 10%;
+  background: var(--ink);
+  border-radius: 50% 50% 0 0 / 30% 30% 0 0;
+  box-shadow: 0 0 40px rgba(0,0,0,.5);
+}
+.ph-silhouette i:nth-child(1){height:55%}
+.ph-silhouette i:nth-child(2){height:70%}
+.ph-silhouette i:nth-child(3){height:62%}
+.ph-silhouette i:nth-child(4){height:75%}
+.ph-silhouette i:nth-child(5){height:60%}
+.ph-silhouette i:nth-child(6){height:68%}
+.ph-sun{
+  position:absolute; left:50%; top:30%; transform: translate(-50%,-50%);
+  width:40%; aspect-ratio:1; border-radius:50%;
+  background: radial-gradient(circle at 50% 40%, #fff, var(--sun-1) 30%, var(--sun-2) 70%, transparent 100%);
+  filter: blur(4px);
+}
+
+/* ============ TESTIMONIALS ============ */
+.testimonials{background: var(--ink-2); position:relative; overflow:hidden}
+.testimonials::before{
+  content:"";
+  position:absolute; left:-15%; bottom:-10%;
+  width: 500px; height:500px;
+  background: radial-gradient(circle, rgba(255,42,138,.18), transparent 60%);
+  pointer-events:none;
+}
+.tg{
+  max-width:1200px; margin:0 auto;
+  display:grid; grid-template-columns: repeat(3, 1fr); gap:22px;
+  position:relative;
+}
+.t{
+  padding: 32px 30px;
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.015));
+  border: 1px solid rgba(34,232,255,.2);
+  position:relative;
+}
+.t .mark{
+  font-family:'Monoton', cursive;
+  color: var(--pink);
+  font-size: 56px;
+  line-height: .5;
+  text-shadow: 0 0 20px rgba(255,42,138,.5);
+  margin-bottom: 12px;
+}
+.t p{
+  color:#e7d9ff;
+  font-size: 17px; line-height:1.55;
+  margin: 0 0 24px;
+}
+.t-by{display:flex; align-items:center; gap:12px}
+.t-av{
+  width: 42px; height: 42px; border-radius:50%;
+  background: linear-gradient(135deg, var(--pink), var(--violet));
+  display:flex; align-items:center; justify-content:center;
+  color:#fff; font-family:'Orbitron', sans-serif; font-weight:900; font-size:14px;
+  border: 1px solid rgba(255,255,255,.2);
+}
+.t-av.cyan{background: linear-gradient(135deg, var(--cyan), var(--violet))}
+.t-av.sun{background: linear-gradient(135deg, var(--sun-1), var(--pink))}
+.t-name{font-family:'Orbitron', sans-serif; font-weight:700; font-size:13px; letter-spacing:.12em; color:#fff}
+.t-event{color: var(--cyan); font-size: 12px; letter-spacing:.1em; margin-top:2px}
+
+/* ============ CTA ============ */
+.bigcta{
+  padding: clamp(80px, 12vw, 140px) clamp(20px,5vw,72px);
+  text-align:center;
+  position:relative; overflow:hidden;
+  background:
+    radial-gradient(ellipse at center, rgba(106,43,255,.4), var(--ink) 70%);
+}
+.bigcta-inner{position:relative; z-index:2; max-width:900px; margin:0 auto}
+.bigcta h2{
+  font-family:'Monoton', cursive;
+  font-weight:400;
+  font-size: clamp(48px, 10vw, 120px);
+  line-height: .95;
+  color:#fff;
+  text-shadow:
+    0 0 6px #fff,
+    0 0 18px var(--cyan),
+    0 0 40px var(--cyan),
+    0 0 80px var(--cyan-2);
+  margin-bottom: 20px;
+}
+.bigcta .p{color:#e7d9ff; font-size: 18px; max-width: 560px; margin: 0 auto 32px}
+.bigcta-grid{
+  position:absolute; inset:auto 0 0 0; height:40%;
+  perspective: 500px;
+  z-index:1; pointer-events:none; opacity:.6;
+}
+.bigcta-grid::before{
+  content:"";
+  position:absolute; left:-20%; right:-20%; top:0; bottom:-40%;
+  transform-origin: top center;
+  transform: rotateX(58deg);
+  background-image:
+    linear-gradient(to right, rgba(34,232,255,.5) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(34,232,255,.5) 1px, transparent 1px);
+  background-size: 72px 72px;
+}
+
+/* ============ FOOTER ============ */
+footer{
+  background: #02010a;
+  padding: 72px clamp(20px,5vw,72px) 40px;
+  border-top: 1px solid rgba(255,42,138,.2);
+}
+.foot{
+  max-width: 1200px; margin: 0 auto;
+  display:grid;
+  grid-template-columns: 1.5fr 1fr 1fr 1fr;
+  gap: 40px;
+}
+.foot h4{
+  font-family:'Orbitron', sans-serif; font-weight:900;
+  font-size: 12px; letter-spacing:.26em; text-transform:uppercase;
+  color: var(--cyan); margin: 0 0 16px;
+}
+.foot p, .foot a{color:#cbb9e7; text-decoration:none; font-size:14px; line-height:1.9; display:block}
+.foot a:hover{color:#fff}
+.foot .brand-name{color:#fff; font-size:16px; margin-bottom:16px; display:block}
+.socials{display:flex; gap:10px; margin-top: 16px}
+.soc{
+  width: 36px; height:36px;
+  border-radius: 50%;
+  border:1px solid rgba(255,42,138,.4);
+  display:flex; align-items:center; justify-content:center;
+  color: #fff;
+  transition: all .2s;
+}
+.soc:hover{background: var(--pink); border-color: var(--pink); box-shadow: 0 0 20px rgba(255,42,138,.6)}
+.soc svg{width:16px; height:16px}
+.foot-bot{
+  max-width: 1200px; margin: 44px auto 0;
+  padding-top: 24px;
+  border-top: 1px solid rgba(255,255,255,.08);
+  display:flex; justify-content:space-between; align-items:center;
+  color:#6b557e; font-size: 12px; letter-spacing:.14em; text-transform:uppercase;
+  font-family:'Orbitron', sans-serif;
+  flex-wrap:wrap; gap:16px;
+}
+
+/* ============ MOBILE ============ */
+@media (max-width: 780px){
+  .nav{padding: 16px 20px}
+  .nav-links, .nav .cta{display:none}
+  .nav-mobile{
+    display:flex; align-items:center; justify-content:center;
+    width: 40px; height: 40px; border-radius:10px;
+    border: 1px solid rgba(34,232,255,.4);
+    background: transparent; color: var(--cyan); cursor:pointer;
+  }
+  .hero-inner{padding: 100px 18px 120px}
+  .hero h1{font-size: clamp(56px, 22vw, 110px)}
+  .hero-sub{font-size: 11px; letter-spacing:.22em}
+  .hero-sub .sep{margin: 0 8px}
+  .hero-ctas{flex-direction:column; align-items:center; width:100%}
+  .hero-ctas .cta{width:100%; max-width: 320px; justify-content:center}
+  .hero-meta{position:static; padding: 0 20px 28px; flex-direction:column; align-items:flex-start; gap:20px}
+  .hero-meta > div{width:100%}
+  section{padding: 80px 20px}
+  .section-head{grid-template-columns: 1fr; margin-bottom: 36px}
+  .section-head h2{font-size: clamp(36px, 12vw, 54px)}
+  .section-head .lead{font-size:15px}
+  .svc-grid{grid-template-columns: 1fr; gap: 14px}
+  .svc{padding: 26px 22px}
+  .stats-inner{grid-template-columns: repeat(2, 1fr); gap: 28px}
+  .stat{border-left:none; padding-left:0}
+  .song{
+    grid-template-columns: 36px 1fr auto;
+    gap: 12px;
+    padding: 14px 6px;
+  }
+  .song .year, .song .vibe{display:none}
+  .song .title{font-size: 15px}
+  .song .artist{font-size: 13px; grid-column: 2; }
+  .song-inner{display:flex; flex-direction:column; gap:2px}
+  .gallery-grid{
+    grid-template-columns: repeat(6, 1fr);
+    grid-auto-rows: 110px;
+  }
+  .ph-1{grid-column: span 6; grid-row: span 2}
+  .ph-2, .ph-3, .ph-4, .ph-5, .ph-6{grid-column: span 3; grid-row: span 1}
+  .tg{grid-template-columns: 1fr; gap: 14px}
+  .foot{grid-template-columns: 1fr 1fr; gap: 32px}
+  .foot > div:first-child{grid-column: span 2}
+  .foot-bot{flex-direction:column; text-align:center}
+  .bigcta h2{font-size: clamp(48px, 16vw, 84px)}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <a href="#top" class="brand">
+    <span class="brand-mark"></span>
+    <span class="brand-name">ARTIFICIOS</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#services">Servicios</a></li>
+    <li><a href="#setlist">Repertorio</a></li>
+    <li><a href="#gallery">Galería</a></li>
+    <li><a href="#testimonials">Opiniones</a></li>
+  </ul>
+  <a href="#book" class="cta">Reservar show</a>
+  <button class="nav-mobile" aria-label="menu">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+  </button>
+</nav>
+
+<!-- HERO -->
+<header class="hero" id="top">
+  <div class="hero-gap"></div>
+  <div class="hero-sky"></div>
+  <div class="hero-stars" data-parallax="0.45"></div>
+  <div class="hero-sun" data-parallax="0.28"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-flash"></div>
+
+  <div class="hero-inner" data-parallax-content="-0.25">
+    <div class="hero-eyebrow">6 músicos · Tributo 80's · Buenos Aires</div>
+    <div class="hero-title">
+      <svg class="hero-arc" viewBox="0 0 1000 400" preserveAspectRatio="none">
+        <path d="M 20,200 Q 140,100 260,220 T 500,180 T 740,220 T 980,160" />
+        <path d="M 0,240 Q 180,320 340,200 T 620,260 T 880,180 T 1000,240" />
+        <path d="M 60,140 Q 220,240 400,140 T 680,200 T 940,120" />
+      </svg>
+      <h1>Artificios</h1>
+    </div>
+    <p class="hero-sub">
+      Bodas <span class="sep">·</span> Corporativos <span class="sep">·</span> Cumpleaños <span class="sep">·</span> Eventos
+    </p>
+    <div class="hero-ctas">
+      <a href="#book" class="cta">Reservar tu evento →</a>
+      <a href="#setlist" class="cta ghost">Ver repertorio</a>
+    </div>
+  </div>
+
+  <div class="hero-meta">
+    <div>
+      <div>Temas en vivo</div>
+      <span class="val">150+</span>
+    </div>
+    <div>
+      <div>Años en escena</div>
+      <span class="val">12</span>
+    </div>
+    <div style="text-align:right">
+      <div>Desliza para ver más</div>
+      <span class="val" style="font-size:20px">↓</span>
+    </div>
+  </div>
+</header>
+
+<!-- SERVICES -->
+<section class="services" id="services" data-parallax-section="0.12">
+  <div class="section-head">
+    <div>
+      <span class="eyebrow">Servicios</span>
+      <h2 style="margin-top:14px">Tu evento, con <em>sonido</em> que se siente <em class="cyan">ochentoso</em>.</h2>
+    </div>
+    <p class="lead">
+      Traemos la energía de una década entera a tu fiesta. Producción completa: sonido, luces y más de 150 canciones a elección.
+    </p>
+  </div>
+  <div class="svc-grid">
+    <article class="svc">
+      <div class="svc-num">01 · Bodas</div>
+      <h3>La banda sonora<br>de su noche.</h3>
+      <p>De la ceremonia al último tema pedido a las 4am. Armamos el setlist con la pareja: los temas que los marcaron y los que no pueden faltar en la pista.</p>
+      <div class="svc-tags">
+        <span class="tag">Set 2×45min</span>
+        <span class="tag">DJ entre sets</span>
+        <span class="tag">Pedidos en vivo</span>
+      </div>
+    </article>
+    <article class="svc">
+      <div class="svc-num">02 · Corporativos</div>
+      <h3>Fin de año,<br>lanzamientos, galas.</h3>
+      <p>Show dinámico para empresas. Adaptamos formato y duración, coordinamos con el equipo de producción del evento y respetamos tiempos al minuto.</p>
+      <div class="svc-tags">
+        <span class="tag">Facturación A</span>
+        <span class="tag">Acústico o full band</span>
+        <span class="tag">Equipos profesionales</span>
+      </div>
+    </article>
+    <article class="svc">
+      <div class="svc-num">03 · Cumpleaños</div>
+      <h3>Hacemos de los 40<br>los nuevos 20.</h3>
+      <p>La fiesta que querés que tus amigos recuerden. Clásicos imbatibles, teclados, guitarras filosas y tres voces que se llevan la cancha entera.</p>
+      <div class="svc-tags">
+        <span class="tag">Salón o quinta</span>
+        <span class="tag">Luces incluidas</span>
+        <span class="tag">Sorpresa para el festejado</span>
+      </div>
+    </article>
+    <article class="svc">
+      <div class="svc-num">04 · Privados</div>
+      <h3>Casas, quintas,<br>terrazas.</h3>
+      <p>Formato reducido o completo para eventos íntimos. Llegamos, armamos, tocamos, desarmamos. Sin dolores de cabeza para el anfitrión.</p>
+      <div class="svc-tags">
+        <span class="tag">Desde 3 músicos</span>
+        <span class="tag">Sonido propio</span>
+        <span class="tag">Duración flexible</span>
+      </div>
+    </article>
+    <article class="svc">
+      <div class="svc-num">05 · Festivales</div>
+      <h3>Escenarios, plazas,<br>multiespacios.</h3>
+      <p>Experiencia tocando para públicos grandes. Rider técnico profesional y coordinación con producción del evento. Traemos la multitud.</p>
+      <div class="svc-tags">
+        <span class="tag">Rider técnico</span>
+        <span class="tag">Backline completo</span>
+        <span class="tag">Sets 60–90min</span>
+      </div>
+    </article>
+    <article class="svc">
+      <div class="svc-num">06 · Temáticos</div>
+      <h3>Noches 80's<br>de principio a fin.</h3>
+      <p>Vestuario, repertorio curado por década y producción visual en tonos retro. Ideal para fiestas temáticas y lanzamientos con concepto.</p>
+      <div class="svc-tags">
+        <span class="tag">Vestuario retro</span>
+        <span class="tag">Visuales VHS</span>
+        <span class="tag">Concepto integral</span>
+      </div>
+    </article>
+  </div>
+</section>
+
+<!-- STATS STRIP -->
+<section class="stats" style="padding:60px clamp(20px,5vw,72px)">
+  <div class="stats-inner">
+    <div class="stat">
+      <div class="num">150+</div>
+      <div class="lbl">Canciones en vivo</div>
+    </div>
+    <div class="stat">
+      <div class="num cyan">6</div>
+      <div class="lbl">Músicos en escena</div>
+    </div>
+    <div class="stat">
+      <div class="num">300+</div>
+      <div class="lbl">Eventos realizados</div>
+    </div>
+    <div class="stat">
+      <div class="num cyan">12</div>
+      <div class="lbl">Años de trayectoria</div>
+    </div>
+  </div>
+</section>
+
+<!-- SETLIST -->
+<section class="setlist" id="setlist" data-parallax-section="0.18">
+  <div class="setlist-wrap">
+    <div class="setlist-head">
+      <div>
+        <span class="eyebrow">Repertorio</span>
+        <h2 style="font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(40px,6vw,76px);line-height:1;letter-spacing:-.02em;color:#fff;margin-top:14px">
+          Los temas que<br><em style="font-style:normal;color:var(--pink);text-shadow:0 0 30px rgba(255,42,138,.6)">todo el mundo</em> conoce.
+        </h2>
+      </div>
+      <div class="setlist-filters">
+        <button class="filter active" data-filter="all">Todos</button>
+        <button class="filter" data-filter="pop">Pop</button>
+        <button class="filter" data-filter="rock">Rock</button>
+        <button class="filter" data-filter="dance">Dance</button>
+        <button class="filter" data-filter="balada">Baladas</button>
+        <button class="filter" data-filter="synth">Synth/New Wave</button>
+        <button class="filter" data-filter="latin">En español</button>
+      </div>
+    </div>
+
+    <div class="setlist-table" id="setlist-table"></div>
+
+    <div class="setlist-foot">
+      <div>Mostrando <span class="count" id="song-count">—</span> temas</div>
+      <a href="#book" class="cta ghost">Solicitar lista completa →</a>
+    </div>
+  </div>
+</section>
+
+<!-- GALLERY -->
+<section class="gallery" id="gallery" data-parallax-section="0.14">
+  <div class="section-head">
+    <div>
+      <span class="eyebrow">Galería</span>
+      <h2 style="margin-top:14px">En <em>vivo</em>, en <em class="cyan">acción</em>.</h2>
+    </div>
+    <p class="lead">Momentos de los shows. Lo que pasa en la pista cuando arrancan los primeros acordes.</p>
+  </div>
+  <div class="gallery-grid">
+    <div class="ph ph-1">
+      <img src="assets/photo-marquee.jpg" alt="Artificios en vivo - marquee" loading="lazy" />
+      <div class="ph-label"><span>ARTIFICIOS · Marquee en vivo</span><span class="tag-sm">2025</span></div>
+    </div>
+    <div class="ph ph-2">
+      <img src="assets/photo-stage-crowd.jpg" alt="Artificios - pista llena" loading="lazy" />
+      <div class="ph-label"><span>Noche 80's · Pista llena</span><span class="tag-sm">2025</span></div>
+    </div>
+    <div class="ph ph-3">
+      <img src="assets/photo-keys-shades.jpg" alt="Artificios - tecladista" loading="lazy" />
+      <div class="ph-label"><span>Tecladista · Solo nocturno</span><span class="tag-sm">2025</span></div>
+    </div>
+    <div class="ph ph-4">
+      <img src="assets/photo-guitar-curly.jpg" alt="Artificios - guitarrista" loading="lazy" />
+      <div class="ph-label"><span>Guitarra · Vestuario retro</span><span class="tag-sm">2025</span></div>
+    </div>
+    <div class="ph ph-5">
+      <img src="assets/photo-singer.jpg" alt="Artificios - cantante" loading="lazy" />
+      <div class="ph-label"><span>Frontman · Show completo</span><span class="tag-sm">2025</span></div>
+    </div>
+    <div class="ph ph-6">
+      <img src="assets/photo-crowd.jpg" alt="Artificios - público filmando" loading="lazy" />
+      <div class="ph-label"><span>Público · Celulares al aire</span><span class="tag-sm">2025</span></div>
+    </div>
+  </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="testimonials" id="testimonials" data-parallax-section="0.16">
+  <div class="section-head">
+    <div>
+      <span class="eyebrow">Opiniones</span>
+      <h2 style="margin-top:14px">Lo que dicen <em>quienes</em> ya bailaron con <em class="cyan">nosotros</em>.</h2>
+    </div>
+    <p class="lead">Algunos de nuestros últimos eventos en Buenos Aires y el interior.</p>
+  </div>
+
+  <div class="tg">
+    <article class="t">
+      <div class="mark">"</div>
+      <p>No paró de bailar nadie. En serio, nadie. Los padres de los novios, los abuelos, los primos chicos. Una locura. Los volvemos a contratar seguro.</p>
+      <div class="t-by">
+        <div class="t-av">JM</div>
+        <div>
+          <div class="t-name">Julia &amp; Martín</div>
+          <div class="t-event">Casamiento · Estancia La Candelaria</div>
+        </div>
+      </div>
+    </article>
+    <article class="t">
+      <div class="mark">"</div>
+      <p>Contratamos la banda para el fin de año de la empresa. 400 personas, todos cantando Careless Whisper como si fuera el himno. Impecables de principio a fin.</p>
+      <div class="t-by">
+        <div class="t-av cyan">CR</div>
+        <div>
+          <div class="t-name">Carolina Reyes</div>
+          <div class="t-event">RRHH · Fin de año corporativo</div>
+        </div>
+      </div>
+    </article>
+    <article class="t">
+      <div class="mark">"</div>
+      <p>Mi esposa cumplía 40 y no quería torta, quería Madonna. Se lo dije a los chicos y arrancaron con Like a Prayer. Lloró. De felicidad. Gracias totales.</p>
+      <div class="t-by">
+        <div class="t-av sun">DF</div>
+        <div>
+          <div class="t-name">Diego Fernández</div>
+          <div class="t-event">Cumpleaños 40 · Pilar</div>
+        </div>
+      </div>
+    </article>
+  </div>
+</section>
+
+<!-- BIG CTA -->
+<section class="bigcta" id="book" data-parallax-section="0.2">
+  <div class="bigcta-grid"></div>
+  <div class="bigcta-inner">
+    <h2 class="neon cyan" style="font-family:'Monoton',cursive;font-weight:400;font-size:clamp(48px,10vw,120px);line-height:.95">Let's<br>dance.</h2>
+    <p class="p">Contanos de tu evento: fecha, lugar y qué tipo de show estás imaginando. Te respondemos en el día con propuesta y presupuesto.</p>
+    <div class="hero-ctas">
+      <a href="https://wa.me/5491162727850" class="cta">WhatsApp · +54 9 11 6272-7850</a>
+      <a href="mailto:artificiosbanda@gmail.com" class="cta ghost">artificiosbanda@gmail.com</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="foot">
+    <div>
+      <a href="#top" class="brand">
+        <span class="brand-mark"></span>
+        <span class="brand-name" style="color:#fff">ARTIFICIOS</span>
+      </a>
+      <p style="margin-top:14px; max-width:320px">Banda tributo a los 80's con base en Buenos Aires. Seis músicos, más de 150 canciones, la energía de una década entera.</p>
+      <div class="socials">
+        <a class="soc" href="#" aria-label="Instagram">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+        </a>
+        <a class="soc" href="#" aria-label="YouTube">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M21.6 7.2a2.5 2.5 0 0 0-1.8-1.8C18.1 5 12 5 12 5s-6.1 0-7.8.4A2.5 2.5 0 0 0 2.4 7.2 26 26 0 0 0 2 12a26 26 0 0 0 .4 4.8 2.5 2.5 0 0 0 1.8 1.8C5.9 19 12 19 12 19s6.1 0 7.8-.4a2.5 2.5 0 0 0 1.8-1.8A26 26 0 0 0 22 12a26 26 0 0 0-.4-4.8zM10 15V9l5.2 3L10 15z"/></svg>
+        </a>
+        <a class="soc" href="#" aria-label="TikTok">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.5 3h-2.5v13a2.5 2.5 0 1 1-2.5-2.5h.5V11a5 5 0 1 0 5 5V8.5a6.5 6.5 0 0 0 4 1.4V7.4a4 4 0 0 1-4-4z"/></svg>
+        </a>
+        <a class="soc" href="#" aria-label="Spotify">
+          <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10" fill="currentColor"/><path d="M7 10c3-1 7-1 10 1M8 13c2.5-.8 5.5-.8 8 .8M8.5 16c2-.6 4-.6 6 .6" stroke="#05010f" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>
+        </a>
+      </div>
+    </div>
+    <div>
+      <h4>Explorar</h4>
+      <a href="#services">Servicios</a>
+      <a href="#setlist">Repertorio</a>
+      <a href="#gallery">Galería</a>
+      <a href="#testimonials">Opiniones</a>
+    </div>
+    <div>
+      <h4>Contacto</h4>
+      <a href="tel:+5491162727850">+54 9 11 6272-7850</a>
+      <a href="mailto:artificiosbanda@gmail.com">artificiosbanda@gmail.com</a>
+      <p>Buenos Aires, Argentina</p>
+      <p>Viajamos a todo el país</p>
+    </div>
+    <div>
+      <h4>Eventos</h4>
+      <a href="#">Bodas</a>
+      <a href="#">Corporativos</a>
+      <a href="#">Cumpleaños</a>
+      <a href="#">Festivales</a>
+    </div>
+  </div>
+  <div class="foot-bot">
+    <div>© 2026 Artificios · Buenos Aires</div>
+    <div>Made with ♥ &amp; synthesizers</div>
+  </div>
+</footer>
+
+<script>
+// Parallax — respect reduced motion. Supports:
+//  [data-parallax]          — vertical translate tied to page scrollY
+//  [data-parallax-content]  — hero content drifts up slightly on scroll
+//  [data-parallax-section]  — translate tied to section's position in viewport
+//  [data-parallax-fade]     — opacity ramp as section enters
+const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+if (!reduce) {
+  const globalEls  = document.querySelectorAll('[data-parallax]');
+  const contentEls = document.querySelectorAll('[data-parallax-content]');
+  const sectionEls = document.querySelectorAll('[data-parallax-section]');
+  const fadeEls    = document.querySelectorAll('[data-parallax-fade]');
+  let ticking = false;
+  const update = () => {
+    const y = window.scrollY;
+    const vh = window.innerHeight;
+
+    // Global (hero bg layers)
+    globalEls.forEach(el => {
+      const s = parseFloat(el.dataset.parallax || '0.2');
+      if (el.classList.contains('hero-sun')){
+        el.style.transform = `translate(-50%, calc(50% + ${y * s}px))`;
+      } else {
+        el.style.transform = `translateY(${y * s}px)`;
+      }
+    });
+
+    // Hero content lifts slightly (feels like camera pulls back)
+    contentEls.forEach(el => {
+      const s = parseFloat(el.dataset.parallaxContent || '-0.2');
+      const rect = el.getBoundingClientRect();
+      if (rect.bottom < 0 || rect.top > vh) return;
+      el.style.transform = `translateY(${y * s}px)`;
+    });
+
+    // Section-scoped parallax (uses viewport-relative progress)
+    sectionEls.forEach(el => {
+      const s = parseFloat(el.dataset.parallaxSection || '0.15');
+      const rect = el.getBoundingClientRect();
+      if (rect.bottom < -200 || rect.top > vh + 200) return;
+      // progress: -1 when section just entered bottom, +1 when it has left top
+      const progress = (rect.top + rect.height / 2 - vh / 2) / vh;
+      el.style.transform = `translateY(${progress * s * 100}px)`;
+    });
+
+    // Fade-in as section enters
+    fadeEls.forEach(el => {
+      const rect = el.getBoundingClientRect();
+      const enter = Math.max(0, Math.min(1, (vh - rect.top) / (vh * 0.6)));
+      el.style.opacity = enter;
+      el.style.transform = `translateY(${(1 - enter) * 40}px)`;
+    });
+
+    ticking = false;
+  };
+  window.addEventListener('scroll', () => {
+    if (!ticking) { requestAnimationFrame(update); ticking = true; }
+  }, { passive: true });
+  update();
+}
+
+// ============ SETLIST DATA + RENDER ============
+const SONGS = [
+  ["A Little Respect","Erasure",1988,"synth"],
+  ["Baby Come Back","Player",1977,"pop"],
+  ["Careless Whisper","George Michael",1984,"balada"],
+  ["Don't You Want Me","Human League",1981,"synth"],
+  ["Easy Lover","Phil Collins",1984,"pop"],
+  ["Everybody Wants to Rule the World","Tears for Fears",1985,"pop"],
+  ["Hold the Line","Toto",1978,"rock"],
+  ["I Just Called to Say I Love You","Stevie Wonder",1984,"balada"],
+  ["I Want to Break Free","Queen",1984,"rock"],
+  ["Is This Love","Whitesnake",1987,"rock"],
+  ["Baby Jane","Rod Stewart",1983,"pop"],
+  ["Maniac","Michael Sembello",1983,"dance"],
+  ["Say Say Say","Michael Jackson & Paul McCartney",1983,"pop"],
+  ["Take On Me","A-Ha",1985,"synth"],
+  ["Your Love","The Outfield",1985,"rock"],
+  ["Square Rooms","Al Corley",1984,"synth"],
+  ["Never Gonna Give You Up","Rick Astley",1987,"pop"],
+  ["Africa","Toto",1982,"rock"],
+  ["Talking in Your Sleep","The Romantics",1983,"rock"],
+  ["Should I Stay or Should I Go","The Clash",1982,"rock"],
+  ["Stop!","Erasure",1991,"synth"],
+  ["It Ain't Over Till It's Over","Lenny Kravitz",1991,"rock"],
+  ["Watermelon Sugar","Harry Styles",2019,"pop"],
+  ["Boys Don't Cry","The Cure",1979,"synth"],
+  ["Sledgehammer","Peter Gabriel",1986,"pop"],
+  ["Eye of the Tiger","Survivor",1982,"rock"],
+  ["Eyes Without a Face","Billy Idol",1984,"rock"],
+  ["(I Just) Died in Your Arms","Cutting Crew",1986,"rock"],
+  ["Mystify","INXS",1987,"rock"],
+  ["Locked Out of Heaven","Bruno Mars",2012,"pop"],
+  ["Big in Japan","Alphaville",1984,"synth"],
+  ["Lady (Hear Me Tonight)","Modjo",2000,"dance"],
+  ["Just an Illusion","Imagination",1982,"dance"],
+  ["Last Train to London","ELO",1979,"dance"],
+  ["Wicked Game","Chris Isaak",1989,"balada"],
+  ["Rock with You","Michael Jackson",1979,"dance"],
+  ["Never Tear Us Apart","INXS",1987,"rock"],
+  ["I Want to Know What Love Is","Foreigner",1984,"balada"],
+  ["I Was Born to Love You","Queen",1985,"rock"],
+  ["Blinding Lights","The Weeknd",2019,"pop"],
+  ["The Power of Love","Huey Lewis & The News",1985,"rock"],
+  ["I Feel It Coming","The Weeknd ft. Daft Punk",2016,"pop"],
+  ["It Must Have Been Love","Roxette",1990,"balada"],
+  ["Stars","Simply Red",1991,"pop"],
+  ["Ladies' Night","Kool & The Gang",1979,"dance"],
+  ["Don't Dream It's Over","Crowded House",1986,"pop"],
+  ["Easy","Commodores / Faith No More",1977,"balada"],
+  ["The Final Countdown","Europe",1986,"rock"],
+  ["Eye in the Sky","Alan Parsons Project",1982,"rock"],
+  ["Head Over Heels","Tears for Fears",1985,"pop"],
+  ["Billie Jean","Michael Jackson",1983,"dance"],
+  ["You Give Love a Bad Name","Bon Jovi",1986,"rock"],
+  ["Always on the Run","Lenny Kravitz",1991,"rock"],
+  ["Purple Rain","Prince",1984,"balada"],
+  ["Sure Know Something","Kiss",1979,"rock"],
+  ["It's My Life","Talk Talk",1984,"synth"],
+  ["Anybody Seen My Baby?","Rolling Stones",1997,"rock"],
+  ["Strangelove","Depeche Mode",1987,"synth"],
+  ["Do I Wanna Know?","Arctic Monkeys",2013,"rock"],
+  ["Karma Chameleon","Culture Club",1983,"pop"],
+  ["Luna de Miel en la Mano","Virus",1985,"latin"],
+  ["Nos Siguen Pegando Abajo","Charly García",1989,"latin"],
+  ["Departamento","Bándalos Chinos",2018,"latin"],
+  ["What's Love Got to Do with It","Tina Turner",1984,"pop"],
+  ["The Look","Roxette",1988,"pop"],
+  ["Girls Just Wanna Have Fun","Cyndi Lauper",1983,"pop"],
+  ["Caribbean Queen","Billy Ocean",1984,"pop"],
+  ["I Was Made for Lovin' You","Kiss",1979,"rock"],
+  ["West End Girls","Pet Shop Boys",1984,"synth"],
+  ["I Can't Go for That (No Can Do)","Hall & Oates",1981,"pop"],
+  ["Every Time You Go Away","Paul Young",1985,"balada"],
+  ["No Sé Tú / Cuando Calienta el Sol","Luis Miguel",1990,"latin"],
+  ["Y.M.C.A.","Village People",1978,"dance"],
+  ["Nothing's Gonna Stop Us Now","Starship",1987,"balada"],
+  ["Te Quiero Tanto","Sergio Denis",1983,"latin"],
+  ["Crazy Little Thing Called Love","Queen",1979,"rock"],
+  ["Celebration","Kool & The Gang",1980,"dance"],
+  ["Lady in Red","Chris de Burgh",1986,"balada"],
+  ["Low","Lenny Kravitz",2018,"rock"],
+  ["Kiss on My List","Hall & Oates",1980,"pop"],
+  ["The Way It Is","Bruce Hornsby",1986,"balada"],
+  ["Just Like Heaven","The Cure",1987,"synth"],
+  ["Broken Wings","Mr. Mister",1985,"balada"],
+  ["Superstition","Stevie Wonder",1972,"dance"],
+  ["I Belong to You","Lenny Kravitz",1998,"rock"],
+  ["Somebody's Watching Me","Rockwell",1984,"synth"],
+  ["Under Pressure","Queen & Bowie",1981,"rock"],
+  ["Miss Me Blind","Culture Club",1983,"pop"],
+  ["Waiting for a Girl Like You","Foreigner",1981,"balada"],
+  ["Adore You","Harry Styles",2019,"pop"],
+  ["Overkill","Men at Work",1983,"rock"],
+  ["Faith","George Michael",1987,"pop"],
+  ["Maneater","Hall & Oates",1982,"pop"],
+  ["Lovesong","The Cure",1989,"synth"],
+  ["Still Got the Blues","Gary Moore",1990,"balada"],
+  ["Money for Nothing","Dire Straits & Sting",1985,"rock"],
+  ["Gold","Chet Faker",2014,"pop"],
+  ["True","Spandau Ballet",1983,"balada"],
+  ["Mr. Blue Sky","ELO",1977,"pop"],
+  ["Give Life Back to Music","Daft Punk",2013,"dance"],
+  ["So Lonely","The Police",1978,"rock"],
+  ["Part-Time Lover","Stevie Wonder",1985,"pop"],
+  ["Self Control","Laura Branigan",1984,"synth"],
+  ["Sweet Dreams","Eurythmics",1983,"synth"],
+  ["Smalltown Boy","Bronski Beat",1984,"synth"],
+  ["Enjoy the Silence","Depeche Mode",1990,"synth"],
+  ["There's No Easy Way Out","Robert Tepper",1985,"rock"],
+  ["Ghostbusters","Ray Parker Jr.",1984,"pop"],
+  ["Feel","Robbie Williams",2002,"pop"],
+];
+
+const VIBE_LABEL = {pop:"Pop", rock:"Rock", dance:"Dance", balada:"Balada", synth:"Synth", latin:"Español"};
+const VIBE_CLASS = {pop:"pink", rock:"sun", dance:"", balada:"", synth:"", latin:"pink"};
+
+const tableEl = document.getElementById('setlist-table');
+const countEl = document.getElementById('song-count');
+let activeFilter = 'all';
+
+function renderSetlist(){
+  const list = activeFilter === 'all' ? SONGS : SONGS.filter(s => s[3] === activeFilter);
+  tableEl.innerHTML = list.map((s, i) => {
+    const idx = String(i+1).padStart(2,'0');
+    const vc = VIBE_CLASS[s[3]] || '';
+    return `<div class="song">
+      <div class="idx">${idx}</div>
+      <div><div class="title">${s[0]}</div><div class="artist">${s[1]}</div></div>
+      <div></div>
+      <div class="year">${s[2]}</div>
+      <div class="vibe ${vc}">${VIBE_LABEL[s[3]]}</div>
+    </div>`;
+  }).join('');
+  countEl.textContent = `${String(list.length).padStart(2,'0')} / ${SONGS.length}`;
+}
+renderSetlist();
+
+document.querySelectorAll('.filter').forEach(b => {
+  b.addEventListener('click', () => {
+    document.querySelectorAll('.filter').forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+    activeFilter = b.dataset.filter || 'all';
+    renderSetlist();
+  });
+});
+</script>
+</body>
+</html>
