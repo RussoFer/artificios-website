@@ -104,25 +104,10 @@ h1,h2,h3{margin:0; font-weight:900; letter-spacing:-.01em}
   background: linear-gradient(180deg, rgba(5,1,15,.72), rgba(5,1,15,.38));
   border-bottom: 1px solid rgba(255,42,138,.18);
 }
-.brand{display:flex; align-items:center; gap:12px; text-decoration:none; color:#fff}
-.brand-mark{
-  width: 34px; height: 34px;
-  border-radius: 50%;
-  background:
-    radial-gradient(circle at 50% 35%, var(--sun-1), var(--sun-2) 45%, var(--sun-3) 90%);
-  position: relative;
-  box-shadow: 0 0 22px rgba(255,110,199,.7), inset 0 -6px 14px rgba(0,0,0,.3);
-}
-.brand-mark::after{
-  content:"";
-  position:absolute; left:0; right:0; top:50%; height:50%;
-  background:
-    linear-gradient(transparent 0, transparent 38%, var(--ink) 38%, var(--ink) 46%, transparent 46%, transparent 64%, var(--ink) 64%, var(--ink) 70%, transparent 70%, transparent 86%, var(--ink) 86%, var(--ink) 90%, transparent 90%);
-  border-radius: 0 0 50% 50% / 0 0 100% 100%;
-}
-.brand-name{
-  font-family:'Orbitron', sans-serif; font-weight:900;
-  letter-spacing:.18em; font-size:14px;
+.brand{display:flex; align-items:center; text-decoration:none; color:#fff}
+.brand-logo{
+  display:block; height: 38px; width:auto;
+  filter: drop-shadow(0 0 14px rgba(255,42,138,.45));
 }
 .nav-links{display:flex; gap:28px; list-style:none; margin:0; padding:0}
 .nav-links a{
@@ -850,7 +835,7 @@ footer{
 }
 .foot p, .foot a{color:#cbb9e7; text-decoration:none; font-size:14px; line-height:1.9; display:block}
 .foot a:hover{color:#fff}
-.foot .brand-name{color:#fff; font-size:16px; margin-bottom:16px; display:block}
+.foot .brand-logo{height: 48px; margin-bottom: 8px}
 .socials{display:flex; gap:10px; margin-top: 16px}
 .soc{
   width: 36px; height:36px;
@@ -917,6 +902,9 @@ footer{
   }
   .ph-1{grid-column: span 6; grid-row: span 2}
   .ph-2, .ph-3, .ph-4, .ph-5, .ph-6{grid-column: span 3; grid-row: span 1}
+  .ph img{
+  object-fit: fill;
+  }
   .tg{grid-template-columns: 1fr; gap: 14px}
   .foot{grid-template-columns: 1fr 1fr; gap: 32px}
   .foot > div:first-child{grid-column: span 2}
@@ -929,9 +917,8 @@ footer{
 
 <!-- NAV -->
 <nav class="nav">
-  <a href="#top" class="brand">
-    <span class="brand-mark"></span>
-    <span class="brand-name">ARTIFICIOS</span>
+  <a href="#top" class="brand" aria-label="Artificios — inicio">
+    <img class="brand-logo" src="assets/artificios-logo.svg" alt="Artificios" />
   </a>
   <ul class="nav-links">
     <li><a href="#services">Servicios</a></li>
@@ -1222,9 +1209,8 @@ footer{
 <footer>
   <div class="foot">
     <div>
-      <a href="#top" class="brand">
-        <span class="brand-mark"></span>
-        <span class="brand-name" style="color:#fff">ARTIFICIOS</span>
+      <a href="#top" class="brand" aria-label="Artificios — inicio">
+        <img class="brand-logo" src="assets/artificios-logo.svg" alt="Artificios" />
       </a>
       <p style="margin-top:14px; max-width:320px">Banda tributo a los 80's con base en Buenos Aires. Seis músicos, más de 150 canciones, la energía de una década entera.</p>
       <div class="socials">
