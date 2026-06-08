@@ -1055,10 +1055,10 @@ input{font: inherit}
 .a-share-copy:hover{ background: rgba(34,232,255,.18); color: #fff }
 .a-share-hint{ font-size: 12px; color: #8f7bb0 }
 .a-share-qr{
-  padding: 8px;
-  border-radius: 10px;
-  background: #fff;
-  display: grid; place-items: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
 }
 .qr{ display: block }
 
@@ -1401,6 +1401,7 @@ input{font: inherit}
 <div id="root"></div>
 
 <script src="poll-songs.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
@@ -2240,43 +2241,42 @@ function ResultsTab({ poll, update, songsById }){
   );
 }
 
-/* Lightweight QR (SVG, deterministic) */
+/* Real scannable QR code via qrcodejs */
 function QRBlock({ value }){
-  const grid = useMemo(() => {
-    const N = 21;
-    let h = 2166136261 >>> 0;
-    for (let i = 0; i < value.length; i++) { h ^= value.charCodeAt(i); h = Math.imul(h, 16777619); }
-    const rand = () => { h ^= h << 13; h ^= h >>> 17; h ^= h << 5; return (h >>> 0) / 4294967296; };
-    const cells = [];
-    for (let y = 0; y < N; y++) {
-      const row = [];
-      for (let x = 0; x < N; x++) {
-        const inFinder = (cx, cy) => {
-          const dx = x - cx, dy = y - cy;
-          if (Math.abs(dx) > 3 || Math.abs(dy) > 3) return null;
-          const m = Math.max(Math.abs(dx), Math.abs(dy));
-          return m === 1 ? false : true;
-        };
-        const f = inFinder(3,3) ?? inFinder(N-4,3) ?? inFinder(3,N-4);
-        if (f !== null && f !== undefined) row.push(f);
-        else row.push(rand() > 0.5);
-      }
-      cells.push(row);
-    }
-    return cells;
+  const containerRef = useRef(null);
+
+  useEffect(() => {
+    if (!containerRef.current || !window.QRCode) return;
+    containerRef.current.innerHTML = '';
+    new window.QRCode(containerRef.current, {
+      text: value,
+      width: 200,
+      height: 200,
+      colorDark: '#05010f',
+      colorLight: '#ffffff',
+      correctLevel: window.QRCode.CorrectLevel.H,
+    });
   }, [value]);
-  const cell = 6;
-  const size = grid.length * cell;
+
+  const download = () => {
+    const canvas = containerRef.current && containerRef.current.querySelector('canvas');
+    if (!canvas) return;
+    const a = document.createElement('a');
+    a.href = canvas.toDataURL('image/png');
+    a.download = 'artificios-poll-qr.png';
+    a.click();
+  };
+
   return (
-    <svg viewBox={`0 0 ${size} ${size}`} width="120" height="120" className="qr">
-      <rect width={size} height={size} fill="#fff" rx="4"/>
-      {grid.map((row, y) =>
-        row.map((on, x) => on
-          ? <rect key={`${x}-${y}`} x={x*cell} y={y*cell} width={cell} height={cell} fill="#05010f"/>
-          : null
-        )
-      )}
-    </svg>
+    <div style={{display:'flex', flexDirection:'column', alignItems:'center', gap: 10}}>
+      <div
+        ref={containerRef}
+        style={{background:'#fff', padding: 10, borderRadius: 12, lineHeight: 0}}
+      ></div>
+      <button onClick={download} className="a-share-copy" style={{width:'100%', textAlign:'center'}}>
+        ↓ Descargar QR
+      </button>
+    </div>
   );
 }
 
