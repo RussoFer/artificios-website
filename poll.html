@@ -1,0 +1,2318 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Artificios · Vota la noche</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Monoton&family=Orbitron:wght@500;700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============ TOKENS (mirrors site.html) ============ */
+:root{
+  --ink:#05010f;
+  --ink-2:#0d0622;
+  --ink-3:#17093a;
+  --paper:#fef6ff;
+  --pink:#ff2a8a;
+  --pink-2:#ff6ec7;
+  --cyan:#22e8ff;
+  --cyan-2:#8bf6ff;
+  --violet:#6a2bff;
+  --sun-1:#ffd86b;
+  --sun-2:#ff5ea8;
+  --grid: rgba(255, 42, 138, .35);
+  --scan: rgba(34, 232, 255, .05);
+}
+
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background: var(--ink);
+  color: var(--paper);
+  font-family: 'Inter', system-ui, sans-serif;
+  font-weight: 400;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+  background-image:
+    radial-gradient(ellipse 90% 60% at 50% 0%, rgba(106,43,255,.28), transparent 70%),
+    radial-gradient(ellipse 80% 50% at 100% 100%, rgba(255,42,138,.18), transparent 70%),
+    radial-gradient(ellipse 70% 50% at 0% 100%, rgba(34,232,255,.14), transparent 70%),
+    linear-gradient(180deg, #0a0418 0%, #05010f 100%);
+}
+body::before{
+  content:"";
+  position: fixed; inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0, transparent 3px,
+    var(--scan) 3px, var(--scan) 4px
+  );
+  mix-blend-mode: screen;
+  z-index: 200;
+}
+::selection{background:var(--pink);color:var(--ink)}
+
+button{font: inherit; color: inherit; background: none; border: none; cursor: pointer}
+input{font: inherit}
+
+/* ============================================================
+   VOTER VIEW (mobile-first)
+   ============================================================ */
+.voter{
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 28px 18px 140px;
+  position: relative;
+  z-index: 1;
+}
+.v-head{
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 18px;
+  margin-bottom: 22px;
+}
+.v-head .brand-logo{
+  filter: drop-shadow(0 0 10px rgba(255,110,199,.4)) drop-shadow(0 0 20px rgba(106,43,255,.35));
+}
+.v-title-block{
+  width: 100%;
+}
+.v-eyebrow{
+  display: inline-block;
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 700;
+  font-size: 10px;
+  letter-spacing: .28em;
+  text-transform: uppercase;
+  color: var(--cyan);
+  padding: 6px 12px;
+  border: 1px solid rgba(34,232,255,.4);
+  border-radius: 999px;
+  background: rgba(5,1,15,.5);
+  margin-bottom: 14px;
+}
+.v-title{
+  font-family: 'Monoton', cursive;
+  font-weight: 400;
+  font-size: clamp(46px, 13vw, 64px);
+  line-height: .92;
+  margin: 0 0 14px;
+  color: #fff;
+  letter-spacing: .02em;
+  text-shadow:
+    0 0 6px #fff,
+    0 0 16px var(--pink),
+    0 0 38px var(--pink),
+    0 0 70px var(--pink-2);
+}
+.v-title em{
+  font-style: normal;
+  color: var(--cyan);
+  text-shadow:
+    0 0 6px #fff,
+    0 0 16px var(--cyan),
+    0 0 38px var(--cyan),
+    0 0 70px var(--cyan-2);
+}
+.v-lead{
+  color: #d8c9f0;
+  font-size: 15px;
+  margin: 0;
+  line-height: 1.55;
+}
+.v-lead strong{ color: var(--cyan); font-weight: 700 }
+
+.v-status{
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,42,138,.3);
+  background: rgba(255,42,138,.08);
+  font-family: 'Orbitron', sans-serif;
+  font-size: 11px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: #fff;
+  margin-bottom: 20px;
+}
+.v-status-sep{ opacity: .5 }
+.dot{
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--cyan);
+  box-shadow: 0 0 0 4px rgba(34,232,255,.18);
+}
+.dot.live{
+  background: #4cff8a;
+  box-shadow: 0 0 0 4px rgba(76,255,138,.18);
+  animation: livePulse 1.6s ease-in-out infinite;
+}
+@keyframes livePulse{
+  0%,100%{ box-shadow: 0 0 0 4px rgba(76,255,138,.18) }
+  50%{ box-shadow: 0 0 0 8px rgba(76,255,138,.0) }
+}
+
+.v-filters{
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  margin: 0 -18px 18px;
+  padding: 2px 18px 8px;
+  scrollbar-width: none;
+}
+.v-filters::-webkit-scrollbar{ display:none }
+.v-chip{
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 500;
+  font-size: 11px;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  padding: 9px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.14);
+  background: rgba(255,255,255,.03);
+  color: #e7d9ff;
+  transition: all .15s;
+}
+.v-chip-n{
+  font-family: 'Orbitron', sans-serif;
+  font-size: 10px;
+  opacity: .7;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(255,255,255,.08);
+  letter-spacing: 0;
+}
+.v-chip.on{
+  background: linear-gradient(92deg, var(--pink), var(--violet));
+  border-color: transparent;
+  color: #fff;
+  box-shadow: 0 0 16px rgba(255,42,138,.35);
+}
+.v-chip.on .v-chip-n{ background: rgba(0,0,0,.25); opacity: 1 }
+
+.v-list{
+  list-style: none;
+  margin: 0; padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.v-card{
+  display: grid;
+  grid-template-columns: 36px 1fr;
+  gap: 12px;
+  align-items: center;
+  padding: 14px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,.08);
+  background: linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,.01));
+  cursor: pointer;
+  transition: transform .15s, border-color .15s, background .15s, box-shadow .15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.v-card:active{ transform: scale(.985) }
+.v-card.sel{
+  border-color: var(--cyan);
+  background: linear-gradient(180deg, rgba(34,232,255,.12), rgba(106,43,255,.08));
+  box-shadow:
+    0 0 0 1px rgba(34,232,255,.6) inset,
+    0 8px 24px rgba(34,232,255,.18),
+    0 0 32px rgba(255,42,138,.15);
+}
+.v-card.dim{ opacity: .42 }
+.v-check{
+  width: 30px; height: 30px;
+  border-radius: 8px;
+  display: grid; place-items: center;
+  color: #fff;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.12);
+  transition: all .15s;
+}
+.v-card.sel .v-check{
+  background: linear-gradient(135deg, var(--cyan), var(--violet));
+  border-color: transparent;
+  box-shadow: 0 0 18px rgba(34,232,255,.6);
+}
+.v-check-empty{ width: 18px; height: 18px; display: block }
+
+.v-card-body{ min-width: 0 }
+.v-card-title{
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+  color: #fff;
+  letter-spacing: -.01em;
+  line-height: 1.2;
+  margin-bottom: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.v-card-meta{
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #cbb9e7;
+  min-width: 0;
+}
+.v-card-artist{
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+  flex: 1;
+}
+.v-vibe{
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 500;
+  font-size: 9px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  padding: 3px 7px;
+  border-radius: 999px;
+  border: 1px solid currentColor;
+  flex-shrink: 0;
+}
+.v-vibe-pink{ color: var(--pink-2) }
+.v-vibe-cyan{ color: var(--cyan) }
+.v-vibe-sun{ color: var(--sun-1) }
+.v-vibe-violet{ color: #c5a8ff }
+.v-year{
+  font-family: 'Orbitron', sans-serif;
+  font-size: 11px;
+  color: #8f7bb0;
+  letter-spacing: .08em;
+  flex-shrink: 0;
+}
+
+.v-spacer{ height: 24px }
+
+.v-submit-bar{
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  z-index: 50;
+  padding: 14px 16px calc(14px + env(safe-area-inset-bottom));
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 12px;
+  align-items: center;
+  background: linear-gradient(180deg, rgba(5,1,15,.6), rgba(5,1,15,.96) 40%);
+  border-top: 1px solid rgba(255,42,138,.3);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+.v-submit-count{
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  padding: 8px 14px;
+  border-radius: 12px;
+  background: rgba(34,232,255,.1);
+  border: 1px solid rgba(34,232,255,.3);
+}
+.v-submit-num{
+  font-family: 'Monoton', cursive;
+  font-size: 26px;
+  color: #fff;
+  line-height: 1;
+  text-shadow: 0 0 14px var(--cyan);
+}
+.v-submit-lbl{
+  font-family: 'Orbitron', sans-serif;
+  font-size: 10px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: #cbb9e7;
+}
+.v-submit-btn{
+  padding: 14px 18px;
+  border-radius: 12px;
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: #fff;
+  background: linear-gradient(92deg, var(--pink), var(--violet));
+  box-shadow: 0 10px 30px rgba(255,42,138,.35), inset 0 0 0 1px rgba(255,255,255,.12);
+  transition: transform .15s, box-shadow .15s, opacity .15s;
+}
+.v-submit-btn:active:not(.off){ transform: translateY(1px) }
+.v-submit-btn.off{
+  background: rgba(255,255,255,.06);
+  color: #6b557e;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+/* ───────── State (closed / thanks) ───────── */
+.state{
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 40px 22px;
+  gap: 24px;
+  position: relative;
+  z-index: 1;
+}
+.state-card{
+  width: 100%;
+  max-width: 460px;
+  padding: 34px 26px;
+  border-radius: 22px;
+  border: 1px solid rgba(34,232,255,.25);
+  background: linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.015));
+  position: relative;
+}
+.state-eyebrow{
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 700;
+  font-size: 10px;
+  letter-spacing: .32em;
+  text-transform: uppercase;
+  color: var(--cyan);
+  margin-bottom: 14px;
+}
+.state-title{
+  font-family: 'Monoton', cursive;
+  font-weight: 400;
+  font-size: clamp(40px, 11vw, 56px);
+  line-height: .95;
+  margin: 0 0 14px;
+  color: #fff;
+  text-shadow: 0 0 6px #fff, 0 0 16px var(--cyan), 0 0 38px var(--cyan);
+}
+.state-title em{
+  font-style: normal;
+  color: var(--pink-2);
+  text-shadow: 0 0 6px #fff, 0 0 16px var(--pink), 0 0 38px var(--pink);
+}
+.state-lead{
+  color: #d8c9f0;
+  font-size: 15px;
+  margin: 0 0 22px;
+  line-height: 1.6;
+}
+.state-picks{
+  margin: 22px 0;
+  padding: 18px;
+  border-radius: 14px;
+  background: rgba(5,1,15,.5);
+  border: 1px solid rgba(255,42,138,.2);
+  text-align: left;
+}
+.state-picks-h{
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: var(--cyan);
+  margin-bottom: 10px;
+}
+.state-picks ul{ list-style: none; margin: 0; padding: 0 }
+.state-picks li{
+  padding: 8px 0;
+  border-top: 1px solid rgba(255,255,255,.06);
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  justify-content: space-between;
+}
+.state-picks li:first-child{ border-top: none }
+.state-pick-title{
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  color: #fff;
+}
+.state-pick-artist{
+  font-size: 12px;
+  color: #8f7bb0;
+  text-align: right;
+}
+.state-cta{
+  display: inline-block;
+  padding: 10px 18px;
+  border-radius: 999px;
+  border: 1px solid rgba(34,232,255,.5);
+  color: var(--cyan);
+  text-decoration: none;
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 500;
+  font-size: 11px;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+}
+.state-cta:hover{ background: rgba(34,232,255,.1); color: #fff }
+
+/* ============================================================
+   CLOSED-RESULTS VIEW
+   ============================================================ */
+.closed-results{
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 28px 18px 60px;
+  position: relative;
+  z-index: 1;
+}
+.cr-head{ text-align: center; margin-bottom: 28px }
+.cr-head .brand-logo{
+  filter: drop-shadow(0 0 10px rgba(255,110,199,.4)) drop-shadow(0 0 22px rgba(106,43,255,.35));
+  margin-bottom: 18px;
+}
+.cr-eyebrow{
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,42,138,.4);
+  background: rgba(255,42,138,.08);
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 700;
+  font-size: 10px;
+  letter-spacing: .24em;
+  text-transform: uppercase;
+  color: var(--pink-2);
+  margin-bottom: 18px;
+}
+.cr-title{
+  font-family: 'Monoton', cursive;
+  font-weight: 400;
+  font-size: clamp(42px, 11vw, 60px);
+  line-height: .95;
+  margin: 0 0 16px;
+  color: #fff;
+  letter-spacing: .02em;
+  text-shadow:
+    0 0 6px #fff,
+    0 0 16px var(--cyan),
+    0 0 38px var(--cyan),
+    0 0 70px var(--cyan-2);
+}
+.cr-title em{
+  font-style: normal;
+  color: var(--pink-2);
+  text-shadow:
+    0 0 6px #fff,
+    0 0 16px var(--pink),
+    0 0 38px var(--pink),
+    0 0 70px var(--pink-2);
+}
+.cr-lead{ color: #d8c9f0; font-size: 15px; margin: 0; line-height: 1.55 }
+.cr-lead strong{ color: var(--cyan); font-weight: 700 }
+
+.cr-podium{
+  display: grid;
+  grid-template-columns: 1fr 1.1fr 1fr;
+  gap: 8px;
+  align-items: end;
+  margin: 28px 0 30px;
+}
+.cr-pod{
+  padding: 18px 12px 16px;
+  border-radius: 14px;
+  text-align: center;
+  border: 1px solid rgba(255,255,255,.1);
+  background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+  position: relative;
+  overflow: hidden;
+}
+.cr-pod-1{
+  order: 2;
+  padding-top: 24px;
+  padding-bottom: 22px;
+  border-color: rgba(255,42,138,.5);
+  background: linear-gradient(180deg, rgba(255,42,138,.18), rgba(106,43,255,.08));
+  box-shadow: 0 12px 30px rgba(255,42,138,.25), inset 0 0 0 1px rgba(255,42,138,.35);
+}
+.cr-pod-2{ order: 1; border-color: rgba(34,232,255,.4); background: linear-gradient(180deg, rgba(34,232,255,.1), rgba(34,232,255,.02)) }
+.cr-pod-3{ order: 3; border-color: rgba(255,216,107,.4); background: linear-gradient(180deg, rgba(255,216,107,.1), rgba(255,216,107,.02)) }
+.cr-pod-pos{ font-size: 28px; line-height: 1; margin-bottom: 10px }
+.cr-pod-1 .cr-pod-pos{ font-size: 34px }
+.cr-pod-title{
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 900;
+  font-size: 13px;
+  color: #fff;
+  letter-spacing: -.01em;
+  line-height: 1.2;
+  margin-bottom: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+.cr-pod-1 .cr-pod-title{ font-size: 15px }
+.cr-pod-artist{
+  font-size: 11px;
+  color: #cbb9e7;
+  margin-bottom: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cr-pod-votes{
+  display: inline-flex;
+  align-items: baseline;
+  gap: 5px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: rgba(5,1,15,.5);
+  border: 1px solid rgba(255,255,255,.12);
+}
+.cr-pod-n{
+  font-family: 'Monoton', cursive;
+  font-size: 20px;
+  color: #fff;
+  line-height: 1;
+  text-shadow: 0 0 12px var(--cyan);
+}
+.cr-pod-1 .cr-pod-n{ text-shadow: 0 0 12px var(--pink) }
+.cr-pod-l{
+  font-family: 'Orbitron', sans-serif;
+  font-size: 9px;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: #cbb9e7;
+}
+
+.cr-list-head{
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 0 4px 12px;
+  border-bottom: 1px solid rgba(255,42,138,.25);
+  margin-bottom: 8px;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 11px;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+}
+.cr-list-head > span:first-child{ color: var(--cyan); font-weight: 700 }
+.cr-list-hint{ color: #8f7bb0 }
+.cr-list{
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.cr-row{
+  display: grid;
+  grid-template-columns: 38px 1fr 44px;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 8px;
+  border-radius: 10px;
+  transition: background .15s;
+}
+.cr-row:hover{ background: rgba(255,255,255,.03) }
+.cr-row.top{
+  background: linear-gradient(90deg, rgba(255,42,138,.08), rgba(34,232,255,.04) 80%, transparent);
+}
+.cr-pos{
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--cyan);
+  letter-spacing: .12em;
+}
+.cr-row.top .cr-pos{ color: var(--pink-2) }
+.cr-row-title{
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  color: #fff;
+  letter-spacing: -.01em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cr-row-artist{
+  font-size: 12px;
+  color: #8f7bb0;
+  margin-bottom: 6px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cr-bar-wrap{
+  height: 4px;
+  background: rgba(255,255,255,.06);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.cr-bar{
+  height: 100%;
+  background: linear-gradient(90deg, var(--pink), var(--violet), var(--cyan));
+  border-radius: 2px;
+  box-shadow: 0 0 10px rgba(255,42,138,.4);
+  transition: width .5s ease;
+}
+.cr-count{
+  font-family: 'Monoton', cursive;
+  font-size: 22px;
+  color: #fff;
+  text-align: right;
+  line-height: 1;
+  text-shadow: 0 0 10px var(--cyan);
+}
+.cr-row.top .cr-count{ text-shadow: 0 0 10px var(--pink) }
+
+.cr-foot{
+  text-align: center;
+  margin-top: 32px;
+}
+
+/* ============================================================
+   ADMIN VIEW
+   ============================================================ */
+.admin{
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 22px clamp(16px, 4vw, 32px) 80px;
+  position: relative;
+  z-index: 1;
+}
+.a-head{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid rgba(255,42,138,.18);
+  margin-bottom: 22px;
+  flex-wrap: wrap;
+}
+.a-back{
+  color: var(--cyan);
+  text-decoration: none;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 11px;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+}
+.a-back:hover{ color: #fff; text-shadow: 0 0 12px var(--cyan) }
+.a-head-mid{
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.a-head-label{
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: #fff;
+}
+.a-status{
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+}
+.a-status-live{ background: rgba(76,255,138,.12); border: 1px solid rgba(76,255,138,.4); color: #8aff9e }
+.a-status-live .dot{ background: #4cff8a; box-shadow: 0 0 0 4px rgba(76,255,138,.2) }
+.a-status-draft{ background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.18); color: #cbb9e7 }
+.a-status-draft .dot{ background: #8f7bb0; box-shadow: 0 0 0 4px rgba(143,123,176,.2) }
+.a-status-closed{ background: rgba(255,42,138,.12); border: 1px solid rgba(255,42,138,.4); color: var(--pink-2) }
+.a-status-closed .dot{ background: var(--pink); box-shadow: 0 0 0 4px rgba(255,42,138,.2) }
+
+.a-meta{
+  display: grid;
+  grid-template-columns: 1.5fr 1fr repeat(3, .8fr);
+  gap: 14px;
+  margin-bottom: 22px;
+}
+.a-meta-field{
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: rgba(255,255,255,.03);
+  border: 1px solid rgba(255,255,255,.08);
+}
+.a-meta-field label{
+  display: block;
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 500;
+  font-size: 10px;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: var(--cyan);
+  margin-bottom: 6px;
+}
+.a-meta-field input{
+  width: 100%;
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 700;
+  font-size: 17px;
+  letter-spacing: .02em;
+  outline: none;
+  padding: 0;
+}
+.a-meta-field input:disabled{ color: #8f7bb0; cursor: not-allowed }
+.a-meta-stat{
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: rgba(255,255,255,.03);
+  border: 1px solid rgba(255,255,255,.08);
+  text-align: center;
+}
+.a-meta-stat-num{
+  font-family: 'Monoton', cursive;
+  font-size: 32px;
+  line-height: 1;
+  color: #fff;
+  text-shadow: 0 0 14px var(--cyan);
+  margin-bottom: 4px;
+}
+.a-meta-stat-num.cyan{ text-shadow: 0 0 14px var(--cyan), 0 0 28px rgba(34,232,255,.4) }
+.a-meta-stat-num.pink{ text-shadow: 0 0 14px var(--pink), 0 0 28px rgba(255,42,138,.4); color: #fff }
+.a-meta-stat-lbl{
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 500;
+  font-size: 9px;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: #cbb9e7;
+}
+
+.a-tabs{
+  display: flex;
+  gap: 4px;
+  background: rgba(255,255,255,.04);
+  padding: 4px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,.08);
+  margin-bottom: 22px;
+}
+.a-tabs button{
+  flex: 1;
+  padding: 12px 14px;
+  border-radius: 10px;
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: #cbb9e7;
+  transition: all .15s;
+}
+.a-tabs button:hover:not(:disabled):not(.on){ color: #fff; background: rgba(255,255,255,.04) }
+.a-tabs button:disabled{ opacity: .35; cursor: not-allowed }
+.a-tabs button.on{
+  background: linear-gradient(92deg, var(--pink), var(--violet));
+  color: #fff;
+  box-shadow: 0 6px 22px rgba(255,42,138,.3);
+}
+
+.a-build-controls{
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.a-search{
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(5,1,15,.5);
+  color: #fff;
+  outline: none;
+}
+.a-search:focus{ border-color: var(--cyan); box-shadow: 0 0 0 3px rgba(34,232,255,.18) }
+.a-filter-chips{
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.a-filter-chips button{
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 500;
+  font-size: 10px;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  padding: 7px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.14);
+  background: rgba(255,255,255,.03);
+  color: #cbb9e7;
+}
+.a-filter-chips button.on{
+  background: rgba(34,232,255,.12);
+  border-color: rgba(34,232,255,.5);
+  color: #fff;
+}
+.a-bulk{
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.a-bulk-btn{
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 500;
+  font-size: 10px;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid rgba(34,232,255,.4);
+  background: rgba(34,232,255,.06);
+  color: var(--cyan);
+}
+.a-bulk-btn:hover{ background: rgba(34,232,255,.14); color: #fff }
+.a-bulk-btn.warn{ border-color: rgba(255,42,138,.4); background: rgba(255,42,138,.06); color: var(--pink-2) }
+.a-bulk-btn.warn:hover{ background: rgba(255,42,138,.14); color: #fff }
+
+.a-build-list{
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 8px;
+  margin-bottom: 22px;
+}
+.a-song{
+  display: grid;
+  grid-template-columns: 28px 1fr auto;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,.08);
+  background: rgba(255,255,255,.025);
+  text-align: left;
+  transition: all .12s;
+}
+.a-song:hover{ border-color: rgba(34,232,255,.4); background: rgba(255,255,255,.05) }
+.a-song.on{
+  border-color: var(--cyan);
+  background: linear-gradient(180deg, rgba(34,232,255,.12), rgba(34,232,255,.04));
+  box-shadow: inset 0 0 0 1px rgba(34,232,255,.4), 0 6px 18px rgba(34,232,255,.12);
+}
+.a-song-toggle{
+  width: 24px; height: 24px;
+  border-radius: 6px;
+  border: 1px solid rgba(255,255,255,.18);
+  display: grid; place-items: center;
+  color: #fff;
+}
+.a-song.on .a-song-toggle{
+  background: linear-gradient(135deg, var(--cyan), var(--violet));
+  border-color: transparent;
+}
+.a-song-toggle-plus{ font-weight: 300; opacity: .6 }
+.a-song-body{ min-width: 0 }
+.a-song-title{
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  color: #fff;
+  letter-spacing: -.01em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.a-song-artist{
+  font-size: 11px;
+  color: #8f7bb0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.a-empty{
+  padding: 32px;
+  text-align: center;
+  color: #8f7bb0;
+  font-size: 14px;
+  border: 1px dashed rgba(255,255,255,.1);
+  border-radius: 12px;
+}
+
+.a-launch{
+  position: sticky;
+  bottom: 18px;
+  margin-top: 22px;
+  padding: 16px 20px;
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(5,1,15,.85), rgba(13,6,34,.95));
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255,42,138,.3);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  box-shadow: 0 18px 40px rgba(0,0,0,.5), 0 0 0 1px rgba(255,42,138,.15);
+}
+.a-launch-summary{
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+.a-launch-n{
+  font-family: 'Monoton', cursive;
+  font-size: 38px;
+  line-height: 1;
+  color: #fff;
+  text-shadow: 0 0 14px var(--cyan);
+}
+.a-launch-lbl{
+  font-family: 'Orbitron', sans-serif;
+  font-size: 11px;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: #cbb9e7;
+}
+.a-launch-btn{
+  padding: 14px 22px;
+  border-radius: 12px;
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: #fff;
+  background: linear-gradient(92deg, var(--pink), var(--violet));
+  box-shadow: 0 12px 30px rgba(255,42,138,.4);
+  transition: all .15s;
+}
+.a-launch-btn:hover:not(:disabled){ transform: translateY(-1px); box-shadow: 0 16px 38px rgba(255,42,138,.55) }
+.a-launch-btn:disabled{ background: rgba(255,255,255,.06); color: #6b557e; box-shadow: none; cursor: not-allowed }
+.a-launch-btn.warn{ background: linear-gradient(92deg, #d11f5f, #6a2bff) }
+.a-launch-btn.alt{ background: linear-gradient(92deg, var(--cyan), var(--violet)); box-shadow: 0 12px 30px rgba(34,232,255,.35) }
+
+.a-share{
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 20px;
+  align-items: center;
+  padding: 20px;
+  border-radius: 16px;
+  border: 1px solid rgba(34,232,255,.3);
+  background: linear-gradient(135deg, rgba(34,232,255,.08), rgba(106,43,255,.08));
+  margin-bottom: 22px;
+}
+.a-share-eyebrow{
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 700;
+  font-size: 10px;
+  letter-spacing: .26em;
+  text-transform: uppercase;
+  color: var(--cyan);
+  margin-bottom: 8px;
+}
+.a-share-url{
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 700;
+  font-size: 18px;
+  color: #fff;
+  word-break: break-all;
+  margin-bottom: 14px;
+  letter-spacing: -.01em;
+}
+.a-share-actions{ display: flex; align-items: center; gap: 12px; flex-wrap: wrap }
+.a-share-copy{
+  padding: 10px 18px;
+  border-radius: 10px;
+  border: 1px solid rgba(34,232,255,.5);
+  background: rgba(34,232,255,.1);
+  color: var(--cyan);
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+}
+.a-share-copy:hover{ background: rgba(34,232,255,.18); color: #fff }
+.a-share-hint{ font-size: 12px; color: #8f7bb0 }
+.a-share-qr{
+  padding: 8px;
+  border-radius: 10px;
+  background: #fff;
+  display: grid; place-items: center;
+}
+.qr{ display: block }
+
+.a-live-bar{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 18px;
+  border-radius: 12px;
+  background: rgba(255,255,255,.03);
+  border: 1px solid rgba(255,255,255,.08);
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+}
+.a-live-n{
+  font-family: 'Monoton', cursive;
+  font-size: 30px;
+  color: #fff;
+  text-shadow: 0 0 14px var(--cyan);
+  margin-right: 10px;
+}
+.a-live-lbl{
+  font-family: 'Orbitron', sans-serif;
+  font-size: 11px;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: #cbb9e7;
+}
+.a-live-actions{ display: flex; gap: 8px; flex-wrap: wrap }
+
+.a-rank{
+  border-radius: 14px;
+  overflow: hidden;
+  background: rgba(255,255,255,.02);
+  border: 1px solid rgba(255,255,255,.08);
+}
+.a-rank-head{
+  display: flex;
+  justify-content: space-between;
+  padding: 14px 18px;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+  font-family: 'Orbitron', sans-serif;
+  font-size: 11px;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+}
+.a-rank-head > span:first-child{ color: var(--cyan); font-weight: 700 }
+.a-rank-hint{ color: #8f7bb0 }
+.a-rank-row{
+  display: grid;
+  grid-template-columns: 50px 1fr 60px;
+  gap: 14px;
+  align-items: center;
+  padding: 12px 18px;
+  border-bottom: 1px solid rgba(255,255,255,.04);
+  transition: background .12s;
+}
+.a-rank-row:hover{ background: rgba(255,255,255,.03) }
+.a-rank-row.top{ background: linear-gradient(90deg, rgba(255,42,138,.06), transparent 60%) }
+.a-rank-pos{
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--cyan);
+  letter-spacing: .12em;
+}
+.a-rank-row.top .a-rank-pos{ color: var(--pink-2) }
+.a-rank-title{
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  color: #fff;
+}
+.a-rank-artist{
+  font-size: 12px;
+  color: #8f7bb0;
+  margin-bottom: 6px;
+}
+.a-rank-bar-wrap{
+  height: 4px;
+  background: rgba(255,255,255,.06);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.a-rank-bar{
+  height: 100%;
+  background: linear-gradient(90deg, var(--pink), var(--violet), var(--cyan));
+  border-radius: 2px;
+  box-shadow: 0 0 12px rgba(255,42,138,.4);
+  transition: width .4s ease;
+}
+.a-rank-count{
+  font-family: 'Monoton', cursive;
+  font-size: 26px;
+  color: #fff;
+  text-align: right;
+  line-height: 1;
+  text-shadow: 0 0 10px var(--cyan);
+}
+
+.a-results-hero{
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 20px;
+  padding: 28px;
+  border-radius: 18px;
+  background: radial-gradient(ellipse at 80% 20%, rgba(255,42,138,.25), transparent 60%),
+              linear-gradient(135deg, rgba(106,43,255,.18), rgba(13,6,34,.4));
+  border: 1px solid rgba(255,42,138,.3);
+  margin-bottom: 22px;
+  flex-wrap: wrap;
+}
+.a-results-eyebrow{
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: .26em;
+  text-transform: uppercase;
+  color: var(--cyan);
+  margin-bottom: 8px;
+}
+.a-results-h{
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 900;
+  font-size: clamp(34px, 4.5vw, 52px);
+  line-height: 1;
+  letter-spacing: -.02em;
+  margin: 0 0 12px;
+  color: #fff;
+}
+.a-results-h em{ font-style: normal; color: var(--pink); text-shadow: 0 0 26px rgba(255,42,138,.5) }
+.a-results-lead{ color: #cbb9e7; font-size: 14px; margin: 0 }
+.a-results-controls{ display: flex; gap: 10px; align-items: end; flex-wrap: wrap }
+.a-results-controls label{
+  display: block;
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 500;
+  font-size: 10px;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: var(--cyan);
+}
+.a-results-controls input{
+  margin-top: 6px;
+  width: 100px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,.16);
+  background: rgba(5,1,15,.5);
+  color: #fff;
+  outline: none;
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+}
+.a-results-grid{
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 18px;
+}
+.a-setlist{
+  border-radius: 14px;
+  border: 1px solid rgba(34,232,255,.3);
+  overflow: hidden;
+  background: rgba(34,232,255,.03);
+  height: fit-content;
+}
+.a-setlist-h{
+  padding: 14px 18px;
+  border-bottom: 1px solid rgba(34,232,255,.2);
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--cyan);
+}
+.a-setlist-ol{
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.a-setlist-ol li{
+  display: grid;
+  grid-template-columns: 32px 1fr auto;
+  gap: 12px;
+  align-items: center;
+  padding: 12px 18px;
+  border-bottom: 1px solid rgba(255,255,255,.04);
+}
+.a-setlist-i{
+  font-family: 'Monoton', cursive;
+  font-size: 22px;
+  color: #fff;
+  text-shadow: 0 0 12px var(--pink);
+}
+.a-setlist-t{
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  color: #fff;
+}
+.a-setlist-a{ font-size: 12px; color: #8f7bb0 }
+.a-setlist-v{
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(34,232,255,.12);
+  border: 1px solid rgba(34,232,255,.4);
+  color: var(--cyan);
+}
+.a-reset{
+  margin-top: 22px;
+  text-align: center;
+}
+
+/* ============ ADMIN GATE ============ */
+.ag-wrap{
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  position: relative;
+  z-index: 1;
+}
+.ag-card{
+  width: 100%;
+  max-width: 400px;
+  padding: 40px 32px 36px;
+  border-radius: 22px;
+  border: 1px solid rgba(34,232,255,.25);
+  background: linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.015));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+}
+.ag-logo{
+  filter: drop-shadow(0 0 10px rgba(255,110,199,.4)) drop-shadow(0 0 20px rgba(106,43,255,.35));
+  margin-bottom: 20px;
+}
+.ag-eyebrow{
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 700;
+  font-size: 10px;
+  letter-spacing: .32em;
+  text-transform: uppercase;
+  color: var(--cyan);
+  margin-bottom: 28px;
+  text-align: center;
+}
+.ag-input-wrap{
+  width: 100%;
+  margin-bottom: 14px;
+}
+.ag-input{
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,.16);
+  background: rgba(5,1,15,.6);
+  color: #fff;
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: .06em;
+  outline: none;
+  text-align: center;
+}
+.ag-input:focus{
+  border-color: var(--cyan);
+  box-shadow: 0 0 0 3px rgba(34,232,255,.18);
+}
+.ag-btn{
+  width: 100%;
+  padding: 14px 22px;
+  border-radius: 12px;
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: #fff;
+  background: linear-gradient(92deg, #ff2a8a, #6a2bff);
+  box-shadow: 0 10px 30px rgba(255,42,138,.35), inset 0 0 0 1px rgba(255,255,255,.12);
+  cursor: pointer;
+  border: none;
+  transition: transform .15s, box-shadow .15s;
+  margin-bottom: 14px;
+}
+.ag-btn:hover{ transform: translateY(-1px); box-shadow: 0 14px 36px rgba(255,42,138,.5) }
+.ag-btn:active{ transform: translateY(0) }
+.ag-error{
+  font-family: 'Orbitron', sans-serif;
+  font-size: 11px;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: #ff4466;
+  text-align: center;
+  min-height: 18px;
+}
+
+/* ============ MOBILE TWEAKS for admin ============ */
+@media (max-width: 760px){
+  .a-meta{
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+  .a-meta > *:nth-child(1), .a-meta > *:nth-child(2){
+    grid-column: span 3;
+  }
+  .a-share{
+    grid-template-columns: 1fr;
+  }
+  .a-share-qr{ justify-self: start }
+  .a-results-grid{ grid-template-columns: 1fr }
+  .a-tabs button{ font-size: 10px; padding: 11px 8px; letter-spacing: .12em }
+  .a-head{ gap: 10px }
+  .a-head-mid{ order: 0 }
+  .a-launch{ flex-direction: column; align-items: stretch; bottom: 12px }
+  .a-launch-btn{ width: 100% }
+  .a-rank-row{ grid-template-columns: 36px 1fr 50px; padding: 10px 12px; gap: 10px }
+  .a-setlist-ol li{ padding: 10px 12px }
+  .cr-podium{ gap: 6px }
+  .cr-pod{ padding: 14px 8px }
+  .cr-pod-1{ padding-top: 18px; padding-bottom: 16px }
+  .cr-pod-title{ font-size: 11px }
+  .cr-pod-1 .cr-pod-title{ font-size: 13px }
+  .cr-pod-artist{ font-size: 10px }
+  .cr-pod-n{ font-size: 18px }
+}
+</style>
+</head>
+<body>
+
+<div id="root"></div>
+
+<script src="poll-songs.js"></script>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script type="text/babel">
+/* Artificios — Song Poll
+   Views:  #vote  (default, mobile-first)  ·  #admin (password gated)
+   State persists in localStorage so refreshing the tab keeps the poll alive.
+*/
+
+const { useState, useEffect, useMemo, useRef } = React;
+
+/* ───────── storage ───────── */
+const STORAGE_KEY = 'artificios_poll_v2';
+const VOTED_KEY   = 'artificios_voted_v2';
+const ADMIN_AUTH_KEY = 'art_admin_auth';
+const ADMIN_PASSWORD = 'artificios2026';
+
+const defaultPoll = {
+  title: 'Show del Sábado',
+  songIds: [],
+  isOpen: false,
+  closed: false,
+  votes: {},
+  voterCount: 0,
+  maxVotes: 5,
+  createdAt: Date.now(),
+};
+
+const seedDemoPoll = () => ({
+  ...defaultPoll,
+  title: 'Demo · Sábado',
+  songIds: [13,49,2,46,17,27,5,42,8,73,38,30,75,103,16,98,84,12,3,59,9,60,71,40],
+  isOpen: true,
+  voterCount: 7,
+  votes: { 13:6, 49:5, 2:4, 46:4, 17:3, 27:3, 5:2, 42:2, 8:2, 73:2, 38:1, 30:1, 75:1, 16:1 },
+  createdAt: Date.now(),
+});
+
+const readPoll = () => {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) {
+      const seed = seedDemoPoll();
+      writePoll(seed);
+      return seed;
+    }
+    return { ...defaultPoll, ...JSON.parse(raw) };
+  } catch { return { ...defaultPoll }; }
+};
+const writePoll = (p) => localStorage.setItem(STORAGE_KEY, JSON.stringify(p));
+
+const readVoted = () => {
+  try { return JSON.parse(localStorage.getItem(VOTED_KEY) || 'null'); }
+  catch { return null; }
+};
+const writeVoted = (v) => localStorage.setItem(VOTED_KEY, JSON.stringify(v));
+
+/* Custom hook: subscribe to poll state */
+function usePoll(){
+  const [poll, setPoll] = useState(readPoll);
+  useEffect(() => {
+    const onStorage = (e) => { if (e.key === STORAGE_KEY) setPoll(readPoll()); };
+    window.addEventListener('storage', onStorage);
+    window.addEventListener('artificios:poll-update', () => setPoll(readPoll()));
+    return () => {
+      window.removeEventListener('storage', onStorage);
+    };
+  }, []);
+  const update = (patch) => {
+    setPoll(prev => {
+      const next = typeof patch === 'function' ? patch(prev) : { ...prev, ...patch };
+      writePoll(next);
+      window.dispatchEvent(new Event('artificios:poll-update'));
+      return next;
+    });
+  };
+  return [poll, update];
+}
+
+/* Simple hash router */
+function useRoute(){
+  const [route, setRoute] = useState(() => (location.hash || '#vote').replace('#',''));
+  useEffect(() => {
+    const onHash = () => setRoute((location.hash || '#vote').replace('#',''));
+    window.addEventListener('hashchange', onHash);
+    return () => window.removeEventListener('hashchange', onHash);
+  }, []);
+  return route;
+}
+
+/* ───────── shared bits ───────── */
+const VIBE_CLASS = { pop:'pink', rock:'sun', dance:'cyan', balada:'violet', synth:'cyan', latin:'pink' };
+
+function Logo({ size = 40 }){
+  return (
+    <svg className="brand-logo" viewBox="0 0 320 96" style={{ height: size }} aria-label="ARTIFICIOS">
+      <defs>
+        <linearGradient id="lp" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#ff6ec7"/><stop offset="1" stopColor="#ff2a8a"/>
+        </linearGradient>
+        <linearGradient id="lv" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#22e8ff"/><stop offset="1" stopColor="#6a2bff"/>
+        </linearGradient>
+      </defs>
+      <g transform="translate(160 78)">
+        <path d="M 0 0 L -150 -10 L -140 -28 Z" fill="url(#lp)"/>
+        <path d="M 0 0 L -120 -42 L -100 -55 Z" fill="url(#lv)"/>
+        <path d="M 0 0 L -80 -62 L -55 -70 Z" fill="url(#lp)"/>
+        <path d="M 0 0 L -38 -74 L -12 -78 Z" fill="url(#lv)"/>
+        <path d="M 0 0 L 12 -78 L 38 -74 Z" fill="url(#lp)"/>
+        <path d="M 0 0 L 55 -70 L 80 -62 Z" fill="url(#lv)"/>
+        <path d="M 0 0 L 100 -55 L 120 -42 Z" fill="url(#lp)"/>
+        <path d="M 0 0 L 140 -28 L 150 -10 Z" fill="url(#lv)"/>
+      </g>
+      <text x="160" y="60" textAnchor="middle" fontFamily="Orbitron, sans-serif" fontWeight="900"
+        fontSize="34" letterSpacing="6" fill="#fff"
+        style={{ paintOrder:'stroke', stroke:'#05010f', strokeWidth:5, strokeLinejoin:'round' }}
+      >ARTIFICIOS</text>
+      <circle cx="196" cy="34" r="2.4" fill="#22e8ff"/>
+    </svg>
+  );
+}
+
+/* ───────── ADMIN GATE ───────── */
+function AdminGate({ onAuth }){
+  const [pw, setPw] = useState('');
+  const [error, setError] = useState('');
+
+  const submit = () => {
+    if (pw === ADMIN_PASSWORD) {
+      localStorage.setItem(ADMIN_AUTH_KEY, '1');
+      onAuth();
+    } else {
+      setError('Contraseña incorrecta');
+      setPw('');
+    }
+  };
+
+  const onKey = (e) => {
+    if (e.key === 'Enter') submit();
+    if (error) setError('');
+  };
+
+  return (
+    <div className="ag-wrap">
+      <div className="ag-card">
+        <svg className="ag-logo" viewBox="0 0 320 96" style={{height:48}} aria-label="ARTIFICIOS">
+          <defs>
+            <linearGradient id="gp" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#ff6ec7"/><stop offset="1" stopColor="#ff2a8a"/></linearGradient>
+            <linearGradient id="gv" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#22e8ff"/><stop offset="1" stopColor="#6a2bff"/></linearGradient>
+          </defs>
+          <g transform="translate(160 78)">
+            <path d="M 0 0 L -150 -10 L -140 -28 Z" fill="url(#gp)"/>
+            <path d="M 0 0 L -120 -42 L -100 -55 Z" fill="url(#gv)"/>
+            <path d="M 0 0 L -80 -62 L -55 -70 Z" fill="url(#gp)"/>
+            <path d="M 0 0 L -38 -74 L -12 -78 Z" fill="url(#gv)"/>
+            <path d="M 0 0 L 12 -78 L 38 -74 Z" fill="url(#gp)"/>
+            <path d="M 0 0 L 55 -70 L 80 -62 Z" fill="url(#gv)"/>
+            <path d="M 0 0 L 100 -55 L 120 -42 Z" fill="url(#gp)"/>
+            <path d="M 0 0 L 140 -28 L 150 -10 Z" fill="url(#gv)"/>
+          </g>
+          <text x="160" y="60" textAnchor="middle" fontFamily="Orbitron, sans-serif" fontWeight="900" fontSize="34" letterSpacing="6" fill="#fff" style={{paintOrder:'stroke',stroke:'#05010f',strokeWidth:5,strokeLinejoin:'round'}}>ARTIFICIOS</text>
+          <circle cx="196" cy="34" r="2.4" fill="#22e8ff"/>
+        </svg>
+        <div className="ag-eyebrow">Panel de Control</div>
+        <div className="ag-input-wrap">
+          <input
+            className="ag-input"
+            type="password"
+            placeholder="••••••••••••••"
+            value={pw}
+            onChange={e => { setPw(e.target.value); if (error) setError(''); }}
+            onKeyDown={onKey}
+            autoFocus
+          />
+        </div>
+        <button className="ag-btn" onClick={submit}>Ingresar</button>
+        <div className="ag-error">{error}</div>
+      </div>
+    </div>
+  );
+}
+
+/* ───────── VOTER VIEW ───────── */
+function VoterView({ poll, songsById }){
+  const [picks, setPicks] = useState(new Set());
+  const [filter, setFilter] = useState('all');
+  const [submitted, setSubmitted] = useState(false);
+  const [voted, setVoted] = useState(null);
+
+  useEffect(() => {
+    const v = readVoted();
+    if (v && v.pollCreatedAt === poll.createdAt) {
+      setVoted(v);
+      setSubmitted(true);
+    }
+  }, [poll.createdAt]);
+
+  const pollSongs = poll.songIds.map(id => songsById[id]).filter(Boolean);
+  const filtered = filter === 'all' ? pollSongs : pollSongs.filter(s => s.vibe === filter);
+
+  const toggle = (id) => {
+    setPicks(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else {
+        if (next.size >= poll.maxVotes) return prev;
+        next.add(id);
+      }
+      return next;
+    });
+  };
+
+  const submit = () => {
+    if (picks.size === 0) return;
+    const next = readPoll();
+    const votes = { ...next.votes };
+    picks.forEach(id => { votes[id] = (votes[id] || 0) + 1; });
+    const updated = { ...next, votes, voterCount: (next.voterCount || 0) + 1 };
+    writePoll(updated);
+    window.dispatchEvent(new Event('artificios:poll-update'));
+    const v = { voted: true, picks: [...picks], pollCreatedAt: poll.createdAt, ts: Date.now() };
+    writeVoted(v);
+    setVoted(v);
+    setSubmitted(true);
+  };
+
+  if (poll.closed) {
+    return <ClosedState poll={poll} songsById={songsById} />;
+  }
+  if (!poll.isOpen || poll.songIds.length === 0) {
+    return <ClosedState pending />;
+  }
+  if (submitted) {
+    return <ThanksState picks={voted ? voted.picks : []} songsById={songsById} maxVotes={poll.maxVotes} />;
+  }
+
+  const vibes = Array.from(new Set(pollSongs.map(s => s.vibe)));
+
+  return (
+    <div className="voter">
+      <header className="v-head">
+        <Logo size={36} />
+        <div className="v-title-block">
+          <div className="v-eyebrow">Vota la noche · {poll.title}</div>
+          <h1 className="v-title">¿Qué querés <em>escuchar</em>?</h1>
+          <p className="v-lead">
+            Elegí hasta <strong>{poll.maxVotes}</strong> temas. La banda toca los más votados.
+          </p>
+        </div>
+      </header>
+
+      <div className="v-status">
+        <span className="dot live"></span>
+        <span>Votación abierta</span>
+        <span className="v-status-sep">·</span>
+        <span>{poll.voterCount} {poll.voterCount === 1 ? 'voto' : 'votos'} enviados</span>
+      </div>
+
+      {vibes.length > 1 && (
+        <div className="v-filters">
+          <button className={`v-chip ${filter==='all'?'on':''}`} onClick={() => setFilter('all')}>
+            Todos <span className="v-chip-n">{pollSongs.length}</span>
+          </button>
+          {vibes.map(v => (
+            <button key={v} className={`v-chip ${filter===v?'on':''}`} onClick={() => setFilter(v)}>
+              {VIBE_LABEL[v]} <span className="v-chip-n">{pollSongs.filter(s => s.vibe === v).length}</span>
+            </button>
+          ))}
+        </div>
+      )}
+
+      <ul className="v-list">
+        {filtered.map(s => {
+          const selected = picks.has(s.id);
+          const full = !selected && picks.size >= poll.maxVotes;
+          return (
+            <li
+              key={s.id}
+              className={`v-card ${selected?'sel':''} ${full?'dim':''}`}
+              onClick={() => toggle(s.id)}
+            >
+              <div className="v-check">
+                {selected
+                  ? <svg viewBox="0 0 24 24" width="22" height="22"><path d="M5 12l5 5L20 7" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                  : <span className="v-check-empty"></span>
+                }
+              </div>
+              <div className="v-card-body">
+                <div className="v-card-title">{s.title}</div>
+                <div className="v-card-meta">
+                  <span className="v-card-artist">{s.artist}</span>
+                  <span className={`v-vibe v-vibe-${VIBE_CLASS[s.vibe]||'cyan'}`}>{VIBE_LABEL[s.vibe]}</span>
+                  <span className="v-year">{s.year}</span>
+                </div>
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+
+      <div className="v-spacer"></div>
+
+      <div className="v-submit-bar">
+        <div className="v-submit-count">
+          <span className="v-submit-num">{picks.size}</span>
+          <span className="v-submit-lbl">/ {poll.maxVotes} elegidas</span>
+        </div>
+        <button
+          className={`v-submit-btn ${picks.size === 0 ? 'off' : ''}`}
+          onClick={submit}
+          disabled={picks.size === 0}
+        >
+          Enviar mi voto →
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function ClosedState({ pending, poll, songsById }){
+  const ranked = useMemo(() => {
+    if (!poll || !songsById) return [];
+    return poll.songIds
+      .map(id => ({ song: songsById[id], votes: poll.votes[id] || 0 }))
+      .filter(x => x.song)
+      .sort((a, b) => b.votes - a.votes || a.song.title.localeCompare(b.song.title));
+  }, [poll, songsById]);
+
+  const totalVotes = ranked.reduce((a, b) => a + b.votes, 0);
+  const maxV = Math.max(1, ...ranked.map(r => r.votes));
+  const TOP = 10;
+
+  if (pending) {
+    return (
+      <div className="state">
+        <Logo size={52} />
+        <div className="state-card">
+          <div className="state-eyebrow">Próximamente</div>
+          <h2 className="state-title">Todavía no <em>arrancó</em>.</h2>
+          <p className="state-lead">
+            La banda está armando la votación. Cuando empiece, este link se actualiza solo.
+          </p>
+          <a className="state-cta" href="index.html">← Volver al sitio</a>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="closed-results">
+      <header className="cr-head">
+        <Logo size={44} />
+        <div className="cr-eyebrow">
+          <span className="dot" style={{ background: 'var(--pink)', boxShadow: '0 0 0 4px rgba(255,42,138,.2)' }}></span>
+          Votación cerrada · {poll.title}
+        </div>
+        <h1 className="cr-title">El <em>setlist</em> de la noche</h1>
+        <p className="cr-lead">
+          {totalVotes === 0
+            ? 'La votación cerró sin votos. Esperá al próximo show.'
+            : <>Los temas más votados por ustedes. <strong>{poll.voterCount}</strong>{' '}
+                {poll.voterCount === 1 ? 'persona votó' : 'personas votaron'} · {totalVotes} votos.</>
+          }
+        </p>
+      </header>
+
+      {ranked.length > 0 && totalVotes > 0 && (
+        <>
+          {ranked[0].votes > 0 && (
+            <div className="cr-podium">
+              {ranked.slice(0, 3).map((r, i) => (
+                r.votes > 0 && (
+                  <div key={r.song.id} className={`cr-pod cr-pod-${i+1}`}>
+                    <div className="cr-pod-pos">{['🥇','🥈','🥉'][i]}</div>
+                    <div className="cr-pod-title">{r.song.title}</div>
+                    <div className="cr-pod-artist">{r.song.artist}</div>
+                    <div className="cr-pod-votes">
+                      <span className="cr-pod-n">{r.votes}</span>
+                      <span className="cr-pod-l">{r.votes === 1 ? 'voto' : 'votos'}</span>
+                    </div>
+                  </div>
+                )
+              ))}
+            </div>
+          )}
+
+          <div className="cr-list-head">
+            <span>Ranking completo</span>
+            <span className="cr-list-hint">{ranked.length} canciones</span>
+          </div>
+          <ul className="cr-list">
+            {ranked.map((r, i) => (
+              <li key={r.song.id} className={`cr-row ${i < TOP ? 'top' : ''}`}>
+                <div className="cr-pos">{String(i+1).padStart(2,'0')}</div>
+                <div className="cr-body">
+                  <div className="cr-row-title">{r.song.title}</div>
+                  <div className="cr-row-artist">{r.song.artist}</div>
+                  <div className="cr-bar-wrap">
+                    <div className="cr-bar" style={{ width: `${(r.votes / maxV) * 100}%` }}></div>
+                  </div>
+                </div>
+                <div className="cr-count">{r.votes}</div>
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+
+      <div className="cr-foot">
+        <a className="state-cta" href="index.html">← Volver al sitio</a>
+      </div>
+    </div>
+  );
+}
+
+function ThanksState({ picks, songsById, maxVotes }){
+  const songs = picks.map(id => songsById[id]).filter(Boolean);
+  return (
+    <div className="state">
+      <Logo size={52} />
+      <div className="state-card">
+        <div className="state-eyebrow">Voto registrado</div>
+        <h2 className="state-title">¡Gracias por <em>votar</em>!</h2>
+        <p className="state-lead">
+          Si suenan tus temas esta noche, gritalos como si los hubieras escrito vos.
+        </p>
+        {songs.length > 0 && (
+          <div className="state-picks">
+            <div className="state-picks-h">Tus {songs.length} elegidas</div>
+            <ul>
+              {songs.map(s => (
+                <li key={s.id}>
+                  <span className="state-pick-title">{s.title}</span>
+                  <span className="state-pick-artist">{s.artist}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+        <a className="state-cta" href="index.html">← Volver al sitio</a>
+      </div>
+    </div>
+  );
+}
+
+/* ───────── ADMIN VIEW ───────── */
+function AdminView({ poll, update, songs, songsById, onLogout }){
+  const [tab, setTab] = useState('build');
+  const [search, setSearch] = useState('');
+  const [filter, setFilter] = useState('all');
+
+  useEffect(() => {
+    if (poll.closed) setTab('results');
+    else if (poll.isOpen && tab === 'build') setTab('live');
+    // eslint-disable-next-line
+  }, [poll.isOpen, poll.closed]);
+
+  const stats = useMemo(() => {
+    const totalVotes = Object.values(poll.votes).reduce((a,b)=>a+b, 0);
+    return { totalVotes };
+  }, [poll.votes]);
+
+  return (
+    <div className="admin">
+      <header className="a-head">
+        <a href="#vote" className="a-back">← Vista de votantes</a>
+        <div className="a-head-mid">
+          <Logo size={32} />
+          <span className="a-head-label">Panel de control · Poll</span>
+        </div>
+        <div style={{display:'flex', alignItems:'center', gap:12, flexWrap:'wrap'}}>
+          <span className={`a-status a-status-${poll.closed ? 'closed' : poll.isOpen ? 'live' : 'draft'}`}>
+            <span className="dot"></span>
+            {poll.closed ? 'Cerrada' : poll.isOpen ? 'En vivo' : 'Borrador'}
+          </span>
+          <button className="a-back" onClick={onLogout} style={{cursor:'pointer'}}>
+            Cerrar sesión →
+          </button>
+        </div>
+      </header>
+
+      <section className="a-meta">
+        <div className="a-meta-field">
+          <label>Título del show</label>
+          <input
+            type="text"
+            value={poll.title}
+            onChange={e => update({ title: e.target.value })}
+            disabled={poll.closed}
+          />
+        </div>
+        <div className="a-meta-field">
+          <label>Votos por persona</label>
+          <input
+            type="number" min="1" max="20"
+            value={poll.maxVotes}
+            onChange={e => update({ maxVotes: Math.max(1, Math.min(20, parseInt(e.target.value)||1)) })}
+            disabled={poll.isOpen || poll.closed}
+          />
+        </div>
+        <div className="a-meta-stat">
+          <div className="a-meta-stat-num">{poll.songIds.length}</div>
+          <div className="a-meta-stat-lbl">en el poll</div>
+        </div>
+        <div className="a-meta-stat">
+          <div className="a-meta-stat-num cyan">{poll.voterCount}</div>
+          <div className="a-meta-stat-lbl">votantes</div>
+        </div>
+        <div className="a-meta-stat">
+          <div className="a-meta-stat-num pink">{stats.totalVotes}</div>
+          <div className="a-meta-stat-lbl">votos totales</div>
+        </div>
+      </section>
+
+      <nav className="a-tabs">
+        <button className={tab==='build'?'on':''} onClick={() => setTab('build')} disabled={poll.closed}>
+          1 · Armar
+        </button>
+        <button className={tab==='live'?'on':''} onClick={() => setTab('live')} disabled={!poll.isOpen && !poll.closed}>
+          2 · En vivo
+        </button>
+        <button className={tab==='results'?'on':''} onClick={() => setTab('results')}>
+          3 · Resultados
+        </button>
+      </nav>
+
+      {tab === 'build' && (
+        <BuildTab
+          poll={poll} update={update} songs={songs}
+          search={search} setSearch={setSearch}
+          filter={filter} setFilter={setFilter}
+        />
+      )}
+      {tab === 'live' && <LiveTab poll={poll} update={update} songsById={songsById} />}
+      {tab === 'results' && <ResultsTab poll={poll} update={update} songsById={songsById} />}
+    </div>
+  );
+}
+
+function BuildTab({ poll, update, songs, search, setSearch, filter, setFilter }){
+  const selectedSet = useMemo(() => new Set(poll.songIds), [poll.songIds]);
+
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return songs.filter(s => {
+      if (filter !== 'all' && s.vibe !== filter) return false;
+      if (q && !(`${s.title} ${s.artist}`.toLowerCase().includes(q))) return false;
+      return true;
+    });
+  }, [songs, search, filter]);
+
+  const toggleSong = (id) => {
+    const next = new Set(selectedSet);
+    if (next.has(id)) next.delete(id); else next.add(id);
+    update({ songIds: [...next] });
+  };
+  const addAllVisible = () => {
+    const next = new Set(selectedSet);
+    filtered.forEach(s => next.add(s.id));
+    update({ songIds: [...next] });
+  };
+  const removeAllVisible = () => {
+    const next = new Set(selectedSet);
+    filtered.forEach(s => next.delete(s.id));
+    update({ songIds: [...next] });
+  };
+  const clearAll = () => update({ songIds: [] });
+  const startPoll = () => {
+    if (poll.songIds.length === 0) return;
+    if (!confirm(`Abrir votación con ${poll.songIds.length} canciones? Una vez abierta no podés cambiar la lista.`)) return;
+    update({ isOpen: true, votes: {}, voterCount: 0, createdAt: Date.now() });
+  };
+
+  const vibes = ['pop','rock','dance','balada','synth','latin'];
+
+  return (
+    <div className="a-build">
+      <div className="a-build-controls">
+        <input
+          className="a-search"
+          type="text"
+          placeholder="Buscar por título o artista…"
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+        />
+        <div className="a-filter-chips">
+          <button className={filter==='all'?'on':''} onClick={() => setFilter('all')}>Todos</button>
+          {vibes.map(v => (
+            <button key={v} className={filter===v?'on':''} onClick={() => setFilter(v)}>{VIBE_LABEL[v]}</button>
+          ))}
+        </div>
+        <div className="a-bulk">
+          <button className="a-bulk-btn" onClick={addAllVisible}>+ Agregar todas visibles</button>
+          <button className="a-bulk-btn" onClick={removeAllVisible}>– Quitar visibles</button>
+          <button className="a-bulk-btn warn" onClick={clearAll}>Limpiar poll</button>
+        </div>
+      </div>
+
+      <div className="a-build-list">
+        {filtered.map(s => {
+          const on = selectedSet.has(s.id);
+          return (
+            <button
+              key={s.id}
+              className={`a-song ${on?'on':''}`}
+              onClick={() => toggleSong(s.id)}
+            >
+              <div className="a-song-toggle">
+                {on
+                  ? <svg viewBox="0 0 24 24" width="18" height="18"><path d="M5 12l5 5L20 7" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                  : <span className="a-song-toggle-plus">+</span>
+                }
+              </div>
+              <div className="a-song-body">
+                <div className="a-song-title">{s.title}</div>
+                <div className="a-song-artist">{s.artist} · {s.year}</div>
+              </div>
+              <span className={`v-vibe v-vibe-${VIBE_CLASS[s.vibe]||'cyan'}`}>{VIBE_LABEL[s.vibe]}</span>
+            </button>
+          );
+        })}
+        {filtered.length === 0 && (
+          <div className="a-empty">Sin resultados para esta búsqueda.</div>
+        )}
+      </div>
+
+      <div className="a-launch">
+        <div className="a-launch-summary">
+          <div className="a-launch-n">{poll.songIds.length}</div>
+          <div className="a-launch-lbl">canciones listas para votar</div>
+        </div>
+        <button
+          className="a-launch-btn"
+          onClick={startPoll}
+          disabled={poll.songIds.length === 0}
+        >
+          {poll.songIds.length === 0 ? 'Elegí al menos 1 canción' : '🎤 Abrir votación'}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function LiveTab({ poll, update, songsById }){
+  const closePoll = () => {
+    if (!confirm('Cerrar votación? Los votantes ya no van a poder votar.')) return;
+    update({ isOpen: false, closed: true });
+  };
+  const reopen = () => {
+    if (!confirm('Reabrir votación? Esto va a borrar los votos actuales.')) return;
+    update({ isOpen: true, closed: false, votes: {}, voterCount: 0, createdAt: Date.now() });
+  };
+  const addDemoVote = () => {
+    const ids = [...poll.songIds].sort(() => Math.random() - 0.5).slice(0, Math.max(1, Math.floor(Math.random() * poll.maxVotes) + 1));
+    const votes = { ...poll.votes };
+    ids.forEach(id => { votes[id] = (votes[id] || 0) + 1; });
+    update({ votes, voterCount: poll.voterCount + 1 });
+  };
+
+  const shareUrl = `${location.origin}${location.pathname}#vote`;
+  const [copied, setCopied] = useState(false);
+  const copy = () => {
+    navigator.clipboard.writeText(shareUrl).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1800);
+    });
+  };
+
+  const ranked = useMemo(() => {
+    const arr = poll.songIds
+      .map(id => ({ song: songsById[id], votes: poll.votes[id] || 0 }))
+      .filter(x => x.song)
+      .sort((a, b) => b.votes - a.votes || a.song.title.localeCompare(b.song.title));
+    return arr;
+  }, [poll.songIds, poll.votes, songsById]);
+
+  const maxV = Math.max(1, ...ranked.map(x => x.votes));
+
+  return (
+    <div className="a-live">
+      <div className="a-share">
+        <div className="a-share-body">
+          <div className="a-share-eyebrow">Compartir con el público</div>
+          <div className="a-share-url">{shareUrl}</div>
+          <div className="a-share-actions">
+            <button className="a-share-copy" onClick={copy}>
+              {copied ? '✓ Copiado' : 'Copiar link'}
+            </button>
+            <span className="a-share-hint">Pegalo en redes o mostralo en el escenario con un QR.</span>
+          </div>
+        </div>
+        <div className="a-share-qr">
+          <QRBlock value={shareUrl} />
+        </div>
+      </div>
+
+      <div className="a-live-bar">
+        <div>
+          <strong className="a-live-n">{poll.voterCount}</strong>
+          <span className="a-live-lbl">{poll.voterCount === 1 ? 'voto enviado' : 'votos enviados'}</span>
+        </div>
+        <div className="a-live-actions">
+          <button className="a-bulk-btn" onClick={addDemoVote}>+ Voto de prueba</button>
+          {poll.closed
+            ? <button className="a-launch-btn alt" onClick={reopen}>Reabrir</button>
+            : <button className="a-launch-btn warn" onClick={closePoll}>Cerrar votación</button>
+          }
+        </div>
+      </div>
+
+      <div className="a-rank">
+        <div className="a-rank-head">
+          <span>Tally en vivo</span>
+          <span className="a-rank-hint">Se actualiza solo cuando llegan votos</span>
+        </div>
+        {ranked.map((r, i) => (
+          <div key={r.song.id} className={`a-rank-row ${i<10?'top':''}`}>
+            <div className="a-rank-pos">{String(i+1).padStart(2,'0')}</div>
+            <div className="a-rank-body">
+              <div className="a-rank-title">{r.song.title}</div>
+              <div className="a-rank-artist">{r.song.artist}</div>
+              <div className="a-rank-bar-wrap">
+                <div
+                  className="a-rank-bar"
+                  style={{ width: `${(r.votes / maxV) * 100}%` }}
+                ></div>
+              </div>
+            </div>
+            <div className="a-rank-count">{r.votes}</div>
+          </div>
+        ))}
+        {ranked.length === 0 && <div className="a-empty">Sin canciones todavía. Volvé a la pestaña Armar.</div>}
+      </div>
+    </div>
+  );
+}
+
+function ResultsTab({ poll, update, songsById }){
+  const ranked = useMemo(() => {
+    return poll.songIds
+      .map(id => ({ song: songsById[id], votes: poll.votes[id] || 0 }))
+      .filter(x => x.song)
+      .sort((a, b) => b.votes - a.votes || a.song.title.localeCompare(b.song.title));
+  }, [poll.songIds, poll.votes, songsById]);
+
+  const totalVotes = ranked.reduce((a,b)=>a+b.votes, 0);
+  const [setlistSize, setSetlistSize] = useState(15);
+  const setlist = ranked.slice(0, setlistSize);
+
+  const copySetlist = () => {
+    const text = setlist.map((r, i) => `${String(i+1).padStart(2,'0')}. ${r.song.title} — ${r.song.artist} (${r.votes} votos)`).join('\n');
+    navigator.clipboard.writeText(`SETLIST · ${poll.title}\n\n${text}`);
+    alert('Setlist copiado al portapapeles.');
+  };
+
+  const reset = () => {
+    if (!confirm('Empezar un poll nuevo? Esto borra todo (canciones, votos, votantes).')) return;
+    localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(VOTED_KEY);
+    window.dispatchEvent(new Event('artificios:poll-update'));
+  };
+
+  if (!poll.closed && totalVotes === 0) {
+    return (
+      <div className="a-empty">
+        Todavía no hay votos. Abrí la votación desde la pestaña Armar y compartí el link.
+      </div>
+    );
+  }
+
+  const maxV = Math.max(1, ...ranked.map(r => r.votes));
+
+  return (
+    <div className="a-results">
+      <div className="a-results-hero">
+        <div>
+          <div className="a-results-eyebrow">{poll.closed ? 'Resultados finales' : 'Vista previa'} · {poll.title}</div>
+          <h2 className="a-results-h">El setlist <em>de la noche</em>.</h2>
+          <p className="a-results-lead">
+            {poll.voterCount} {poll.voterCount === 1 ? 'persona votó' : 'personas votaron'} ·
+            {' '}{totalVotes} votos totales · {ranked.length} canciones
+          </p>
+        </div>
+        <div className="a-results-controls">
+          <label>Tamaño del setlist
+            <input type="number" min="1" max={ranked.length || 1} value={setlistSize}
+              onChange={e => setSetlistSize(Math.max(1, Math.min(ranked.length || 1, parseInt(e.target.value)||1)))}
+            />
+          </label>
+          <button className="a-launch-btn alt" onClick={copySetlist}>Copiar setlist</button>
+        </div>
+      </div>
+
+      <div className="a-results-grid">
+        <div className="a-setlist">
+          <div className="a-setlist-h">Setlist sugerido · Top {setlistSize}</div>
+          <ol className="a-setlist-ol">
+            {setlist.map((r, i) => (
+              <li key={r.song.id}>
+                <span className="a-setlist-i">{String(i+1).padStart(2,'0')}</span>
+                <div className="a-setlist-info">
+                  <div className="a-setlist-t">{r.song.title}</div>
+                  <div className="a-setlist-a">{r.song.artist}</div>
+                </div>
+                <span className="a-setlist-v">{r.votes}</span>
+              </li>
+            ))}
+          </ol>
+        </div>
+
+        <div className="a-rank">
+          <div className="a-rank-head">
+            <span>Ranking completo</span>
+            <span className="a-rank-hint">Todas las canciones del poll</span>
+          </div>
+          {ranked.map((r, i) => (
+            <div key={r.song.id} className={`a-rank-row ${i<setlistSize?'top':''}`}>
+              <div className="a-rank-pos">{String(i+1).padStart(2,'0')}</div>
+              <div className="a-rank-body">
+                <div className="a-rank-title">{r.song.title}</div>
+                <div className="a-rank-artist">{r.song.artist}</div>
+                <div className="a-rank-bar-wrap">
+                  <div className="a-rank-bar" style={{ width: `${(r.votes / maxV) * 100}%` }}></div>
+                </div>
+              </div>
+              <div className="a-rank-count">{r.votes}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="a-reset">
+        <button className="a-bulk-btn warn" onClick={reset}>Empezar un poll nuevo</button>
+      </div>
+    </div>
+  );
+}
+
+/* Lightweight QR (SVG, deterministic) */
+function QRBlock({ value }){
+  const grid = useMemo(() => {
+    const N = 21;
+    let h = 2166136261 >>> 0;
+    for (let i = 0; i < value.length; i++) { h ^= value.charCodeAt(i); h = Math.imul(h, 16777619); }
+    const rand = () => { h ^= h << 13; h ^= h >>> 17; h ^= h << 5; return (h >>> 0) / 4294967296; };
+    const cells = [];
+    for (let y = 0; y < N; y++) {
+      const row = [];
+      for (let x = 0; x < N; x++) {
+        const inFinder = (cx, cy) => {
+          const dx = x - cx, dy = y - cy;
+          if (Math.abs(dx) > 3 || Math.abs(dy) > 3) return null;
+          const m = Math.max(Math.abs(dx), Math.abs(dy));
+          return m === 1 ? false : true;
+        };
+        const f = inFinder(3,3) ?? inFinder(N-4,3) ?? inFinder(3,N-4);
+        if (f !== null && f !== undefined) row.push(f);
+        else row.push(rand() > 0.5);
+      }
+      cells.push(row);
+    }
+    return cells;
+  }, [value]);
+  const cell = 6;
+  const size = grid.length * cell;
+  return (
+    <svg viewBox={`0 0 ${size} ${size}`} width="120" height="120" className="qr">
+      <rect width={size} height={size} fill="#fff" rx="4"/>
+      {grid.map((row, y) =>
+        row.map((on, x) => on
+          ? <rect key={`${x}-${y}`} x={x*cell} y={y*cell} width={cell} height={cell} fill="#05010f"/>
+          : null
+        )
+      )}
+    </svg>
+  );
+}
+
+/* ───────── ROOT ───────── */
+function App(){
+  const [poll, update] = usePoll();
+  const route = useRoute();
+  const songs = window.ARTIFICIOS_SONGS;
+  const songsById = useMemo(() => {
+    const m = {}; songs.forEach(s => m[s.id] = s); return m;
+  }, [songs]);
+
+  const [isAdminAuth, setIsAdminAuth] = useState(
+    () => localStorage.getItem(ADMIN_AUTH_KEY) === '1'
+  );
+
+  const handleAuth = () => setIsAdminAuth(true);
+
+  const handleLogout = () => {
+    localStorage.removeItem(ADMIN_AUTH_KEY);
+    setIsAdminAuth(false);
+    location.hash = '#vote';
+  };
+
+  if (route === 'admin') {
+    if (!isAdminAuth) {
+      return <AdminGate onAuth={handleAuth} />;
+    }
+    return <AdminView poll={poll} update={update} songs={songs} songsById={songsById} onLogout={handleLogout} />;
+  }
+
+  return <VoterView poll={poll} songsById={songsById} />;
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+
+</body>
+</html>

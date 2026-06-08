@@ -1,0 +1,2749 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Artificios · Flyer Templates</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Monoton&family=Orbitron:wght@500;700;900&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/html-to-image@1.11.11/dist/html-to-image.js"></script>
+<script src="https://unpkg.com/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
+<script>
+// Pre-fetch EVERY Google font we use (Monoton, Orbitron, Inter, JetBrains
+// Mono) and register each face as a base64 data URI so the PNG export
+// pipeline (html-to-image / html2canvas) renders the exact same typography
+// you see on screen. Without this, the exporters can't always cross-origin
+// fetch the fonts at capture time and fall back to system fonts, which
+// changes the look. We parse each @font-face block individually so the
+// per-weight / per-style faces (e.g. Orbitron 500/700/900) are preserved.
+(function() {
+  // One combined request; each @font-face block declares its own family.
+  const CSS_URL =
+    'https://fonts.googleapis.com/css2' +
+    '?family=Inter:wght@300;400;500;600;700' +
+    '&family=JetBrains+Mono:wght@400;500;700' +
+    '&family=Monoton' +
+    '&family=Orbitron:wght@500;700;900' +
+    '&display=swap';
+
+  async function toDataUri(url){
+    const r = await fetch(url);
+    const blob = await r.blob();
+    return await new Promise((res, rej) => {
+      const fr = new FileReader();
+      fr.onload = () => res(fr.result);
+      fr.onerror = rej;
+      fr.readAsDataURL(blob);
+    });
+  }
+
+  window.__fontsReady = (async () => {
+    try {
+      const css = await (await fetch(CSS_URL, {
+        headers: { 'Accept': 'text/css,*/*;q=0.1' }
+      })).text();
+
+      const blocks = css.match(/@font-face\s*\{[^}]*\}/g) || [];
+      if (!blocks.length) throw new Error('no @font-face blocks');
+
+      const rules = [];
+      let count = 0;
+      for (const block of blocks) {
+        const family = (block.match(/font-family:\s*['"]([^'"]+)['"]/) || [])[1];
+        const weight = (block.match(/font-weight:\s*([^;]+);/) || [])[1] || '400';
+        const style  = (block.match(/font-style:\s*([^;]+);/)  || [])[1] || 'normal';
+        const url    = (block.match(/url\((https:[^)]+\.woff2)\)/) || [])[1];
+        if (!family || !url) continue;
+        const du = await toDataUri(url);
+        rules.push(
+          "@font-face{font-family:'" + family + "';" +
+          "font-style:" + style.trim() + ";font-weight:" + weight.trim() + ";" +
+          "font-display:block;src:url('" + du + "') format('woff2');}"
+        );
+        // Register via FontFace API too, so html2canvas (reads document.fonts)
+        // sees it immediately without re-fetching.
+        try {
+          const ff = new FontFace(family, "url('" + du + "')", {
+            weight: weight.trim(), style: style.trim()
+          });
+          await ff.load();
+          document.fonts.add(ff);
+        } catch (e) { /* ignore per-face errors */ }
+        count++;
+      }
+
+      const styleEl = document.createElement('style');
+      styleEl.setAttribute('data-inlined-fonts', 'all');
+      styleEl.textContent = rules.join('\n');
+      document.head.appendChild(styleEl);
+      console.log('[fonts] inlined ' + count + ' faces across all families');
+    } catch (e) {
+      console.warn('[fonts] could not inline fonts:', e);
+    }
+  })();
+})();
+</script>
+
+<style>
+:root{
+  --ink:#05010f; --ink-2:#0d0622; --ink-3:#17093a;
+  --paper:#fef6ff;
+  --pink:#ff2a8a; --pink-2:#ff6ec7;
+  --cyan:#22e8ff; --cyan-2:#8bf6ff;
+  --violet:#6a2bff;
+  --sun-1:#ffd86b; --sun-2:#ff5ea8; --sun-3:#6a2bff;
+  --grid: rgba(255, 42, 138, .55);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:#13101c;color:#fff;font-family:'Inter',system-ui,sans-serif}
+body{min-height:100vh}
+
+/* ===== PASSWORD GATE ===== */
+#gate-overlay{
+  position:fixed; inset:0; z-index:9999;
+  background: #05010f;
+  background-image:
+    radial-gradient(ellipse 90% 60% at 50% 0%, rgba(106,43,255,.28), transparent 70%),
+    radial-gradient(ellipse 80% 50% at 100% 100%, rgba(255,42,138,.18), transparent 70%),
+    linear-gradient(180deg, #0a0418 0%, #05010f 100%);
+  display:flex; align-items:center; justify-content:center; padding:40px 20px;
+}
+#gate-overlay::before{
+  content:""; position:fixed; inset:0; pointer-events:none;
+  background: repeating-linear-gradient(to bottom, transparent 0, transparent 3px, rgba(34,232,255,.05) 3px, rgba(34,232,255,.05) 4px);
+  mix-blend-mode:screen; z-index:1;
+}
+.gate-card{
+  position:relative; z-index:2;
+  width:100%; max-width:400px;
+  padding:40px 32px 36px;
+  border-radius:22px;
+  border:1px solid rgba(34,232,255,.25);
+  background:linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.015));
+  display:flex; flex-direction:column; align-items:center;
+}
+.gate-logo{
+  filter:drop-shadow(0 0 10px rgba(255,110,199,.4)) drop-shadow(0 0 20px rgba(106,43,255,.35));
+  margin-bottom:20px;
+}
+.gate-eyebrow{
+  font-family:'Orbitron',sans-serif; font-weight:700; font-size:10px;
+  letter-spacing:.32em; text-transform:uppercase; color:#22e8ff;
+  margin-bottom:28px; text-align:center;
+}
+.gate-input{
+  width:100%; padding:14px 16px; margin-bottom:14px;
+  border-radius:12px; border:1px solid rgba(255,255,255,.16);
+  background:rgba(5,1,15,.6); color:#fff;
+  font-family:'Orbitron',sans-serif; font-weight:700; font-size:16px;
+  letter-spacing:.06em; text-align:center; outline:none;
+}
+.gate-input:focus{ border-color:#22e8ff; box-shadow:0 0 0 3px rgba(34,232,255,.18) }
+.gate-btn{
+  width:100%; padding:14px 22px; margin-bottom:14px;
+  border-radius:12px; border:none; cursor:pointer;
+  font-family:'Orbitron',sans-serif; font-weight:700; font-size:13px;
+  letter-spacing:.22em; text-transform:uppercase; color:#fff;
+  background:linear-gradient(92deg,#ff2a8a,#6a2bff);
+  box-shadow:0 10px 30px rgba(255,42,138,.35), inset 0 0 0 1px rgba(255,255,255,.12);
+  transition:transform .15s;
+}
+.gate-btn:hover{ transform:translateY(-1px) }
+.gate-error{
+  font-family:'Orbitron',sans-serif; font-size:11px;
+  letter-spacing:.18em; text-transform:uppercase;
+  color:#ff4466; text-align:center; min-height:18px;
+}
+#app-wrapper{ display:none }
+.logout-link{
+  font-family:'Orbitron',sans-serif; font-size:11px;
+  letter-spacing:.2em; text-transform:uppercase;
+  color:#22e8ff; text-decoration:none; cursor:pointer;
+  background:none; border:none; padding:0;
+}
+.logout-link:hover{ color:#fff; text-shadow:0 0 12px #22e8ff }
+
+.page{padding:40px clamp(20px,4vw,40px) 100px; max-width:1600px; margin:0 auto}
+.page-head h1{font-family:'Orbitron',sans-serif; font-weight:900; font-size:24px; letter-spacing:.06em; margin:0 0 8px}
+.page-head p{color:#a89cc4; font-size:13px; max-width:720px; margin:0; line-height:1.55}
+
+/* ===== Tweaks form (per-template, scoped to each flyer) ===== */
+.tweaks{
+  margin: 0 0 26px;
+  padding: 20px 22px 22px;
+  background: rgba(255,255,255,.035);
+  border: 1px solid rgba(255,42,138,.22);
+  border-left: 3px solid var(--pink);
+  border-radius: 10px;
+  display:grid; grid-template-columns: repeat(4, 1fr); gap: 14px 16px;
+}
+.tweaks .tweaks-title{
+  grid-column: 1 / -1;
+  display:flex; align-items:center; gap:10px;
+  font-family:'Orbitron',sans-serif; font-weight:700;
+  font-size:11px; letter-spacing:.28em; text-transform:uppercase;
+  color: var(--pink);
+  margin: 0 0 4px;
+}
+.tweaks .tweaks-title::before{
+  content:""; width: 22px; height: 1px; background: var(--pink);
+}
+.tweaks .tweaks-title .scope{
+  color: #8b7aa8; font-weight:500; letter-spacing:.18em;
+  margin-left: 4px;
+}
+.tweaks .t{display:flex; flex-direction:column; gap:6px}
+.tweaks .t.wide{grid-column: span 2}
+.tweaks .t.full{grid-column: 1 / -1}
+.tweaks label{
+  font-family:'Orbitron',sans-serif; font-weight:600; font-size:10px;
+  letter-spacing:.22em; text-transform:uppercase; color: var(--cyan);
+}
+.tweaks input, .tweaks textarea, .tweaks select{
+  background: #1a142b; color:#fff; border: 1px solid rgba(255,255,255,.14);
+  border-radius:8px; padding:10px 12px; font-family:'Inter',sans-serif; font-size:14px;
+  font-weight:500;
+}
+.tweaks input:focus, .tweaks textarea:focus, .tweaks select:focus{outline:none; border-color: var(--pink)}
+.tweaks textarea{resize:vertical; min-height:60px; font-family:'Inter',sans-serif}
+.tweaks .t.check{
+  flex-direction:row; align-items:center; gap:10px;
+  cursor:pointer; user-select:none;
+  align-self:end; padding-bottom:10px;
+}
+.tweaks .t.check input{
+  width:18px; height:18px; flex:0 0 auto; accent-color: var(--pink);
+  cursor:pointer;
+}
+.tweaks .t.check span{
+  font-family:'Orbitron',sans-serif; font-weight:600; font-size:10px;
+  letter-spacing:.18em; text-transform:uppercase; color:#cbb9e7;
+}
+.tweaks .color-row{display:flex; gap:8px; align-items:center}
+.tweaks .color-row input[type="color"]{
+  width:38px; height:38px; padding:2px; flex:0 0 auto;
+  background:#1a142b; border:1px solid rgba(255,255,255,.14);
+  border-radius:8px; cursor:pointer;
+}
+.tweaks .color-row input.hex{flex:1; min-width:0; text-transform:uppercase}
+
+/* ===== Flyer grid ===== */
+.template-block{
+  margin: 0 0 56px;
+  padding: 26px 26px 30px;
+  background: rgba(255,255,255,.018);
+  border: 1px solid rgba(255,255,255,.05);
+  border-radius: 16px;
+}
+.template-block + .template-block{
+  margin-top: 28px;
+}
+.template-head{
+  display:flex; align-items:baseline; gap:14px; margin-bottom: 22px;
+  border-bottom: 1px solid rgba(255,42,138,.2); padding-bottom: 12px;
+}
+.template-head .num{
+  font-family:'Orbitron',sans-serif; font-weight:900;
+  color: var(--cyan); font-size:13px; letter-spacing:.22em;
+}
+.template-head h2{
+  font-family:'Orbitron',sans-serif; font-weight:700;
+  font-size:18px; letter-spacing:.04em; margin:0;
+}
+.template-head .desc{color:#9d8ab8; font-size:12px; margin-left:auto}
+
+.size-row{display:flex; gap:32px; flex-wrap:wrap; align-items:flex-start}
+.size-wrap{display:flex; flex-direction:column; gap:10px}
+.size-label{
+  font-family:'Orbitron',sans-serif; font-weight:500; font-size:10px;
+  letter-spacing:.22em; text-transform:uppercase; color:#8b7aa8;
+  display:flex; justify-content:space-between; align-items:center; gap:14px;
+  width: var(--lbl-w, auto);
+}
+.dl-btn{
+  font-family:'Orbitron',sans-serif; font-weight:700; font-size:9px;
+  letter-spacing:.22em; text-transform:uppercase;
+  padding:6px 12px; border-radius:6px; cursor:pointer;
+  background: linear-gradient(92deg, var(--pink), var(--violet));
+  color:#fff; border:none;
+  transition: transform .15s;
+}
+.dl-btn:hover{transform: translateY(-1px)}
+.dl-btn:disabled{opacity:.5; cursor:wait}
+
+/* Flyers — sized in absolute px, scaled to fit screen via transform */
+.flyer{
+  position: relative;
+  background: #000;
+  overflow:hidden;
+  transform-origin: top left;
+  font-family:'Inter',sans-serif;
+}
+.flyer-shrink{
+  position: relative;
+  /* width/height derived from flyer × scale */
+}
+
+/* ===== Building blocks ===== */
+.scanlines::after{
+  content:""; position:absolute; inset:0;
+  background: repeating-linear-gradient(to bottom, transparent 0, transparent 5px, rgba(34,232,255,.05) 5px, rgba(34,232,255,.05) 6px);
+  mix-blend-mode: screen; pointer-events:none;
+}
+.grid-floor{position:absolute; pointer-events:none; perspective:600px}
+.grid-floor::before{
+  content:""; position:absolute; inset:0;
+  transform-origin: top center;
+  transform: rotateX(64deg);
+  background-image:
+    linear-gradient(to right, var(--grid) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid) 1px, transparent 1px);
+  background-size: 80px 80px;
+}
+
+/* ===== TEMPLATE 1 — Single Gig (full neon) ===== */
+.f1{
+  background:
+    radial-gradient(ellipse 90% 70% at 50% 100%, rgba(255,110,199,.35), transparent 60%),
+    linear-gradient(180deg, #0a0418 0%, #1a0542 35%, #49126e 75%, #b02c8a 100%);
+}
+.f1 .stars{
+  position:absolute; inset:0;
+  background-image:
+    radial-gradient(1px 1px at 12% 18%, #fff, transparent),
+    radial-gradient(1px 1px at 28% 12%, #fff, transparent),
+    radial-gradient(1px 1px at 44% 8%, #fff, transparent),
+    radial-gradient(1.5px 1.5px at 63% 14%, #fff, transparent),
+    radial-gradient(1px 1px at 78% 6%, #fff, transparent),
+    radial-gradient(1px 1px at 88% 22%, #fff, transparent),
+    radial-gradient(1px 1px at 6% 28%, #fff, transparent),
+    radial-gradient(1.5px 1.5px at 32% 24%, #fff, transparent),
+    radial-gradient(1px 1px at 56% 4%, var(--cyan-2), transparent),
+    radial-gradient(1px 1px at 72% 18%, var(--pink-2), transparent),
+    radial-gradient(1px 1px at 92% 8%, #fff, transparent);
+  opacity:.85;
+}
+.f1 .sun{
+  position:absolute; left:50%;
+  width: 70%; aspect-ratio:1;
+  border-radius:50%;
+  background: linear-gradient(180deg, var(--sun-1) 0%, var(--sun-2) 55%, var(--sun-3) 100%);
+  filter: drop-shadow(0 0 60px rgba(255,110,199,.6));
+}
+.f1 .sun::after{
+  content:""; position:absolute; inset:0;
+  background: repeating-linear-gradient(to bottom,
+    transparent 0, transparent 52%,
+    #1a0542 52%, #1a0542 55%,
+    transparent 55%, transparent 62%,
+    #1a0542 62%, #1a0542 64%,
+    transparent 64%, transparent 72%,
+    #1a0542 72%, #1a0542 73.5%,
+    transparent 73.5%, transparent 82%,
+    #1a0542 82%, #1a0542 83%,
+    transparent 83%
+  );
+}
+.f1 .grid-floor{left:-20%; right:-20%; bottom:0; height:50%}
+.f1 .grid-floor::before{
+  background:
+    linear-gradient(180deg, transparent 0%, #05010f 80%),
+    linear-gradient(to right, var(--grid) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid) 1px, transparent 1px);
+  background-size: 100% 100%, 80px 80px, 80px 80px;
+}
+.f1 .content{
+  position:absolute; left:0; right:0;
+  text-align:center;
+  z-index:2;
+}
+.f1 .topline{
+  font-family:'Orbitron',sans-serif; font-weight:500;
+  letter-spacing:.42em; text-transform:uppercase; color: var(--cyan);
+  text-shadow: 0 0 10px var(--cyan);
+}
+.f1 .neon-title{
+  font-family:'Monoton', cursive;
+  color:#fff;
+  letter-spacing:.02em; line-height:1;
+  text-shadow:
+    0 0 6px #fff, 0 0 18px var(--pink),
+    0 0 40px var(--pink), 0 0 80px var(--pink-2);
+}
+.f1 .event{
+  font-family:'Orbitron',sans-serif; font-weight:900;
+  color:#fff; letter-spacing:.05em; line-height:1.05;
+  text-shadow: 0 0 14px rgba(34,232,255,.4);
+}
+.f1 .info-block{
+  display:flex; gap: 8%;
+  justify-content:center; align-items:flex-start;
+  text-align:center;
+}
+.f1 .info{display:flex; flex-direction:column; gap:6px; align-items:center}
+.f1 .info .lbl{
+  font-family:'Orbitron',sans-serif; font-weight:500;
+  letter-spacing:.32em; text-transform:uppercase; color: var(--cyan);
+}
+.f1 .info .val{
+  font-family:'Orbitron',sans-serif; font-weight:700;
+  color:#fff;
+}
+.f1 .frame{
+  position:absolute;
+  border: 1px solid rgba(34,232,255,.4);
+  pointer-events:none;
+  box-shadow: inset 0 0 22px rgba(255,42,138,.18);
+}
+
+/* ===== TEMPLATE 1C — Single Gig (laser lime / electric blue) ===== */
+.f1c{
+  background:
+    radial-gradient(ellipse 90% 70% at 50% 100%, rgba(120,255,210,.32), transparent 60%),
+    linear-gradient(180deg, #02101a 0%, #052233 35%, #064a63 75%, #1aa0a0 100%);
+}
+.f1c .stars{
+  position:absolute; inset:0;
+  background-image:
+    radial-gradient(1px 1px at 12% 18%, #fff, transparent),
+    radial-gradient(1px 1px at 28% 12%, #fff, transparent),
+    radial-gradient(1px 1px at 44% 8%, #fff, transparent),
+    radial-gradient(1.5px 1.5px at 63% 14%, #fff, transparent),
+    radial-gradient(1px 1px at 78% 6%, #fff, transparent),
+    radial-gradient(1px 1px at 88% 22%, #fff, transparent),
+    radial-gradient(1px 1px at 6% 28%, #fff, transparent),
+    radial-gradient(1.5px 1.5px at 32% 24%, #fff, transparent),
+    radial-gradient(1px 1px at 56% 4%, #d6ff8a, transparent),
+    radial-gradient(1px 1px at 72% 18%, #9af2ff, transparent),
+    radial-gradient(1px 1px at 92% 8%, #fff, transparent);
+  opacity:.85;
+}
+.f1c .sun{
+  position:absolute; left:50%;
+  width: 70%; aspect-ratio:1;
+  border-radius:50%;
+  background: linear-gradient(180deg, #d6ff6b 0%, #2ad4ff 55%, #0a4f8a 100%);
+  filter: drop-shadow(0 0 60px rgba(120,255,210,.55));
+}
+.f1c .sun::after{
+  content:""; position:absolute; inset:0;
+  background: repeating-linear-gradient(to bottom,
+    transparent 0, transparent 52%,
+    #052233 52%, #052233 55%,
+    transparent 55%, transparent 62%,
+    #052233 62%, #052233 64%,
+    transparent 64%, transparent 72%,
+    #052233 72%, #052233 73.5%,
+    transparent 73.5%, transparent 82%,
+    #052233 82%, #052233 83%,
+    transparent 83%
+  );
+}
+.f1c .grid-floor{left:-20%; right:-20%; bottom:0; height:50%}
+.f1c .grid-floor::before{
+  background:
+    linear-gradient(180deg, transparent 0%, #02101a 80%),
+    linear-gradient(to right, rgba(54,224,255,.5) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(54,224,255,.5) 1px, transparent 1px);
+  background-size: 100% 100%, 80px 80px, 80px 80px;
+}
+.f1c .content{
+  position:absolute; left:0; right:0;
+  text-align:center;
+  z-index:2;
+}
+.f1c .topline{
+  font-family:'Orbitron',sans-serif; font-weight:500;
+  letter-spacing:.42em; text-transform:uppercase; color: #c2ff4a;
+  text-shadow: 0 0 10px #c2ff4a;
+}
+.f1c .neon-title{
+  font-family:'Monoton', cursive;
+  color:#fff;
+  letter-spacing:.02em; line-height:1;
+  text-shadow:
+    0 0 6px #fff, 0 0 18px #36e0ff,
+    0 0 40px #36e0ff, 0 0 80px #9af2ff;
+}
+.f1c .event{
+  font-family:'Orbitron',sans-serif; font-weight:900;
+  color:#fff; letter-spacing:.05em; line-height:1.05;
+  text-shadow: 0 0 14px rgba(194,255,74,.4);
+}
+.f1c .info-block{
+  display:flex; gap: 8%;
+  justify-content:center; align-items:flex-start;
+  text-align:center;
+}
+.f1c .info{display:flex; flex-direction:column; gap:6px; align-items:center}
+.f1c .info .lbl{
+  font-family:'Orbitron',sans-serif; font-weight:500;
+  letter-spacing:.32em; text-transform:uppercase; color: #c2ff4a;
+}
+.f1c .info .val{
+  font-family:'Orbitron',sans-serif; font-weight:700;
+  color:#fff;
+}
+.f1c .frame{
+  position:absolute;
+  border: 1px solid rgba(194,255,74,.4);
+  pointer-events:none;
+  box-shadow: inset 0 0 22px rgba(54,224,255,.18);
+}
+
+
+/* ===== TEMPLATE 1D — Single Gig (vaporwave pastel) ===== */
+.f1d{
+  background:
+    radial-gradient(ellipse 90% 70% at 50% 100%, rgba(255,180,210,.34), transparent 60%),
+    linear-gradient(180deg, #150f28 0%, #2a1d4a 35%, #7a4a9e 75%, #e69ac8 100%);
+}
+.f1d .stars{
+  position:absolute; inset:0;
+  background-image:
+    radial-gradient(1px 1px at 12% 18%, #fff, transparent),
+    radial-gradient(1px 1px at 28% 12%, #fff, transparent),
+    radial-gradient(1px 1px at 44% 8%, #fff, transparent),
+    radial-gradient(1.5px 1.5px at 63% 14%, #fff, transparent),
+    radial-gradient(1px 1px at 78% 6%, #fff, transparent),
+    radial-gradient(1px 1px at 88% 22%, #fff, transparent),
+    radial-gradient(1px 1px at 6% 28%, #fff, transparent),
+    radial-gradient(1.5px 1.5px at 32% 24%, #fff, transparent),
+    radial-gradient(1px 1px at 56% 4%, #b8f2ec, transparent),
+    radial-gradient(1px 1px at 72% 18%, #d3b0ff, transparent),
+    radial-gradient(1px 1px at 92% 8%, #fff, transparent);
+  opacity:.85;
+}
+.f1d .sun{
+  position:absolute; left:50%;
+  width: 70%; aspect-ratio:1;
+  border-radius:50%;
+  background: linear-gradient(180deg, #ffd9a8 0%, #ff9ad0 55%, #9a7ad8 100%);
+  filter: drop-shadow(0 0 60px rgba(255,180,210,.5));
+}
+.f1d .sun::after{
+  content:""; position:absolute; inset:0;
+  background: repeating-linear-gradient(to bottom,
+    transparent 0, transparent 52%,
+    #2a1d4a 52%, #2a1d4a 55%,
+    transparent 55%, transparent 62%,
+    #2a1d4a 62%, #2a1d4a 64%,
+    transparent 64%, transparent 72%,
+    #2a1d4a 72%, #2a1d4a 73.5%,
+    transparent 73.5%, transparent 82%,
+    #2a1d4a 82%, #2a1d4a 83%,
+    transparent 83%
+  );
+}
+.f1d .grid-floor{left:-20%; right:-20%; bottom:0; height:50%}
+.f1d .grid-floor::before{
+  background:
+    linear-gradient(180deg, transparent 0%, #150f28 80%),
+    linear-gradient(to right, rgba(211,176,255,.5) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(211,176,255,.5) 1px, transparent 1px);
+  background-size: 100% 100%, 80px 80px, 80px 80px;
+}
+.f1d .content{
+  position:absolute; left:0; right:0;
+  text-align:center;
+  z-index:2;
+}
+.f1d .topline{
+  font-family:'Orbitron',sans-serif; font-weight:500;
+  letter-spacing:.42em; text-transform:uppercase; color: #8fe9e0;
+  text-shadow: 0 0 10px #8fe9e0;
+}
+.f1d .neon-title{
+  font-family:'Monoton', cursive;
+  color:#fff;
+  letter-spacing:.02em; line-height:1;
+  text-shadow:
+    0 0 6px #fff, 0 0 18px #ff9ad8,
+    0 0 40px #ff9ad8, 0 0 80px #d3b0ff;
+}
+.f1d .event{
+  font-family:'Orbitron',sans-serif; font-weight:900;
+  color:#fff; letter-spacing:.05em; line-height:1.05;
+  text-shadow: 0 0 14px rgba(143,233,224,.4);
+}
+.f1d .info-block{
+  display:flex; gap: 8%;
+  justify-content:center; align-items:flex-start;
+  text-align:center;
+}
+.f1d .info{display:flex; flex-direction:column; gap:6px; align-items:center}
+.f1d .info .lbl{
+  font-family:'Orbitron',sans-serif; font-weight:500;
+  letter-spacing:.32em; text-transform:uppercase; color: #8fe9e0;
+}
+.f1d .info .val{
+  font-family:'Orbitron',sans-serif; font-weight:700;
+  color:#fff;
+}
+.f1d .frame{
+  position:absolute;
+  border: 1px solid rgba(143,233,224,.4);
+  pointer-events:none;
+  box-shadow: inset 0 0 22px rgba(255,154,216,.18);
+}
+
+
+/* ===== TEMPLATE 1B — Single Gig (warm dusk / filmic) ===== */
+.f1b{
+  background:
+    radial-gradient(ellipse 100% 70% at 50% 100%, rgba(214,128,80,.35), transparent 65%),
+    linear-gradient(180deg, #0e0a14 0%, #211522 38%, #4a2622 72%, #8a4a3a 100%);
+}
+.f1b .grain::after{
+  content:""; position:absolute; inset:0;
+  background-image:
+    radial-gradient(1px 1px at 12% 18%, rgba(255,240,210,.6), transparent),
+    radial-gradient(1px 1px at 28% 12%, rgba(255,240,210,.45), transparent),
+    radial-gradient(1px 1px at 44% 8%,  rgba(255,240,210,.5), transparent),
+    radial-gradient(1.4px 1.4px at 63% 14%, rgba(255,240,210,.55), transparent),
+    radial-gradient(1px 1px at 78% 6%,  rgba(255,240,210,.4), transparent),
+    radial-gradient(1px 1px at 88% 22%, rgba(255,240,210,.5), transparent),
+    radial-gradient(1px 1px at 6% 28%,  rgba(255,240,210,.4), transparent),
+    radial-gradient(1.4px 1.4px at 32% 24%, rgba(255,240,210,.55), transparent);
+  opacity:.7;
+  pointer-events:none;
+}
+.f1b .grain::before{
+  content:""; position:absolute; inset:0;
+  background: repeating-linear-gradient(to bottom, transparent 0, transparent 3px, rgba(255,240,210,.02) 3px, rgba(255,240,210,.02) 4px);
+  pointer-events:none;
+  mix-blend-mode: overlay;
+}
+.f1b .sun{
+  position:absolute; left:50%;
+  width: 70%; aspect-ratio:1;
+  border-radius:50%;
+  background: linear-gradient(180deg, #f4c177 0%, #d9764a 55%, #6e2a30 100%);
+  filter: drop-shadow(0 0 50px rgba(217,118,74,.35));
+}
+.f1b .sun::after{
+  content:""; position:absolute; inset:0;
+  background: repeating-linear-gradient(to bottom,
+    transparent 0, transparent 52%,
+    #211522 52%, #211522 55%,
+    transparent 55%, transparent 62%,
+    #211522 62%, #211522 64%,
+    transparent 64%, transparent 72%,
+    #211522 72%, #211522 73.5%,
+    transparent 73.5%, transparent 82%,
+    #211522 82%, #211522 83%,
+    transparent 83%
+  );
+}
+.f1b .grid-floor{left:-20%; right:-20%; bottom:0; height:50%}
+.f1b .grid-floor::before{
+  background:
+    linear-gradient(180deg, transparent 0%, #0e0a14 85%),
+    linear-gradient(to right, rgba(217,118,74,.32) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(217,118,74,.32) 1px, transparent 1px);
+  background-size: 100% 100%, 80px 80px, 80px 80px;
+}
+.f1b .content{
+  position:absolute; left:0; right:0;
+  text-align:center;
+  z-index:2;
+}
+.f1b .topline{
+  font-family:'Orbitron',sans-serif; font-weight:500;
+  letter-spacing:.42em; text-transform:uppercase; color:#e8c79a;
+}
+.f1b .title{
+  font-family:'Orbitron',sans-serif; font-weight:900;
+  color:#f6e7c8;
+  letter-spacing:.04em; line-height:1;
+  text-shadow: 0 2px 0 rgba(0,0,0,.35);
+}
+.f1b .title-rule{
+  display:flex; align-items:center; justify-content:center; gap:18px;
+  margin-top: 14px;
+}
+.f1b .title-rule .line{ flex:1; max-width: 22%; height:1px; background: rgba(232,199,154,.5) }
+.f1b .title-rule .dot{ width:6px; height:6px; border-radius:50%; background:#e8c79a }
+.f1b .event{
+  font-family:'Inter',sans-serif; font-weight:300; font-style:italic;
+  color:#f6e7c8; letter-spacing:.04em; line-height:1.1;
+}
+.f1b .info-block{
+  display:flex; gap: 8%;
+  justify-content:center; align-items:flex-start;
+  text-align:center;
+}
+.f1b .info{display:flex; flex-direction:column; gap:6px; align-items:center}
+.f1b .info .lbl{
+  font-family:'Orbitron',sans-serif; font-weight:500;
+  letter-spacing:.32em; text-transform:uppercase; color:#e8c79a;
+}
+.f1b .info .val{
+  font-family:'Orbitron',sans-serif; font-weight:700;
+  color:#f6e7c8;
+}
+.f1b .frame{
+  position:absolute;
+  border: 1px solid rgba(232,199,154,.35);
+  pointer-events:none;
+}
+
+/* ===== TEMPLATE 2 — Multi-date tour (clean & minimal) ===== */
+.f2{ background:#05010f }
+.f2 .header{
+  position:absolute; left:0; right:0; top:0;
+  display:flex; flex-direction:column; align-items:center;
+  text-align:center;
+}
+.f2 .topline{
+  font-family:'Orbitron',sans-serif; font-weight:500;
+  letter-spacing:.42em; text-transform:uppercase; color: var(--pink);
+}
+.f2 .tour-title{
+  font-family:'Orbitron',sans-serif; font-weight:900;
+  color:#fff; letter-spacing:.05em; line-height:1;
+}
+.f2 .tour-sub{
+  font-family:'Inter',sans-serif; font-weight:500; color:#cbb9e7;
+}
+.f2 .dates{
+  position:absolute; left:0; right:0;
+  display:flex; flex-direction:column;
+}
+.f2 .date-row{
+  display:grid; grid-template-columns: auto 1fr auto;
+  align-items:center; gap: 24px;
+  padding: 18px 0;
+  border-bottom: 1px solid rgba(255,42,138,.28);
+}
+.f2 .date-row:first-child{border-top: 1px solid rgba(255,42,138,.28)}
+.f2 .d-day{
+  font-family:'Monoton', cursive;
+  color:#fff;
+  text-shadow: 0 0 4px #fff, 0 0 14px var(--pink), 0 0 32px var(--pink);
+  line-height:1;
+}
+.f2 .d-mid{display:flex; flex-direction:column; gap:4px; text-align:left}
+.f2 .d-venue{
+  font-family:'Orbitron',sans-serif; font-weight:700; color:#fff;
+}
+.f2 .d-addr{
+  font-family:'Inter',sans-serif; color:#a89cc4; font-weight:500;
+}
+.f2 .d-time{
+  font-family:'Orbitron',sans-serif; font-weight:700;
+  color: var(--cyan); text-align:right; letter-spacing:.06em;
+}
+.f2 .footer{
+  position:absolute; left:0; right:0; bottom:0;
+  display:flex; flex-direction:column; align-items:center;
+  text-align:center;
+}
+.f2 .footer-cta{
+  font-family:'Orbitron',sans-serif; font-weight:700;
+  color: var(--cyan); letter-spacing:.32em; text-transform:uppercase;
+  border: 1px solid var(--cyan);
+  border-radius: 999px;
+}
+
+/* ===== TEMPLATE 4 — Photo Hero (full-bleed band photo + neon overlay) ===== */
+.f4{ background: #000 }
+.f4 .photo{
+  position:absolute; inset:0;
+  background-size: cover; background-position: center;
+  filter: contrast(1.05) saturate(1.1);
+}
+.f4 .photo::after{
+  content:""; position:absolute; inset:0;
+  background:
+    linear-gradient(180deg, rgba(5,1,15,.55) 0%, transparent 30%, transparent 55%, rgba(5,1,15,.92) 100%),
+    linear-gradient(90deg, rgba(106,43,255,.25), rgba(255,42,138,.25));
+  mix-blend-mode: multiply;
+}
+.f4 .gradient-edge{
+  position:absolute; left:0; right:0; bottom:0; height:55%;
+  background: linear-gradient(180deg, transparent 0%, rgba(5,1,15,.85) 60%, #05010f 100%);
+}
+.f4 .top-band{
+  position:absolute; left:0; right:0; top:0;
+  display:flex; justify-content:space-between; align-items:center;
+  z-index: 3;
+}
+.f4 .badge{
+  font-family:'Orbitron',sans-serif; font-weight:700;
+  letter-spacing:.32em; text-transform:uppercase; color: var(--cyan);
+  text-shadow: 0 0 12px var(--cyan);
+}
+.f4 .neon{
+  position:absolute; left:0; right:0;
+  text-align:center; z-index: 3;
+  font-family:'Monoton', cursive;
+  color:#fff; line-height:1; letter-spacing:.02em;
+  text-shadow: 0 0 6px #fff, 0 0 18px var(--pink), 0 0 40px var(--pink), 0 0 80px var(--pink-2);
+}
+.f4 .event-name{
+  position:absolute; left:0; right:0;
+  text-align:center; z-index:3;
+  font-family:'Orbitron',sans-serif; font-weight:900;
+  color:#fff; letter-spacing:.06em;
+}
+.f4 .info-strip{
+  position:absolute; left:0; right:0;
+  display:flex; justify-content:center; align-items:stretch;
+  z-index:3;
+}
+.f4 .info-strip .cell{
+  display:flex; flex-direction:column; gap:4px; align-items:center;
+  padding: 0 24px;
+  border-right: 1px solid rgba(34,232,255,.4);
+}
+.f4 .info-strip .cell:last-child{border-right:none}
+.f4 .info-strip .lbl{
+  font-family:'Orbitron',sans-serif; font-weight:500;
+  letter-spacing:.32em; text-transform:uppercase; color: var(--cyan);
+}
+.f4 .info-strip .val{
+  font-family:'Orbitron',sans-serif; font-weight:700; color:#fff;
+}
+.f4 .footer{
+  position:absolute; left:0; right:0; bottom:0;
+  text-align:center; z-index:3;
+  font-family:'Inter',sans-serif; color:#cbb9e7;
+}
+
+/* ===== TEMPLATE 5 — Contact Sheet (photographic) ===== */
+.f5{
+  background: #0d0a08;
+  color: #f6e8c4;
+}
+.f5 .grain::before{
+  content:""; position:absolute; inset:0;
+  background-image:
+    radial-gradient(circle at 13% 22%, rgba(255,235,200,.04) 0, transparent 40%),
+    radial-gradient(circle at 78% 78%, rgba(214,68,60,.06) 0, transparent 45%);
+  pointer-events:none;
+}
+.f5 .grain::after{
+  content:""; position:absolute; inset:0;
+  background: repeating-linear-gradient(to bottom, transparent 0, transparent 2px, rgba(246,232,196,.02) 2px, rgba(246,232,196,.02) 3px);
+  pointer-events:none;
+  mix-blend-mode: overlay;
+}
+.f5 .header-row{
+  position:absolute; left:0; right:0;
+  display:flex; justify-content:space-between; align-items:center;
+  font-family:'JetBrains Mono','Courier New',monospace;
+  color:#a09584; letter-spacing:.16em; text-transform:uppercase;
+  z-index:3;
+}
+.f5 .title{
+  position:absolute; left:0; right:0;
+  text-align:left;
+  font-family:'Orbitron',sans-serif; font-weight:900;
+  color:#f6e8c4; letter-spacing:-.01em; line-height:.95;
+  text-transform:uppercase;
+  z-index:3;
+}
+.f5 .title em{
+  font-family:'Inter',sans-serif; font-weight:300; font-style:italic;
+  color:#d6443c; text-transform:none; letter-spacing:.02em;
+}
+.f5 .subtitle{
+  font-family:'Orbitron',sans-serif; font-weight:700;
+  letter-spacing:.32em; text-transform:uppercase; color:#d6443c;
+}
+.f5 .sheet{
+  position:absolute;
+  display:grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr;
+  background:#0d0a08;
+  z-index:2;
+}
+.f5 .frame{
+  position:relative;
+  display:flex; flex-direction:column;
+  background:#1a1612;
+  overflow:hidden;
+}
+.f5 .frame .ph{
+  flex:1;
+  background-size: cover;
+  /* portrait band shots — bias crop toward upper third so faces survive */
+  background-position: 50% 22%;
+  filter: contrast(1.05) saturate(.9) brightness(.92);
+}
+.f5 .frame .strip{
+  display:flex; justify-content:space-between; align-items:center;
+  background:#0d0a08;
+  font-family:'JetBrains Mono','Courier New',monospace;
+  color:#a09584; letter-spacing:.18em; text-transform:uppercase;
+}
+.f5 .frame .strip .num{ color:#f6e8c4 }
+.f5 .sprockets{
+  display:flex; justify-content:space-between; align-items:center;
+  background:#0d0a08;
+}
+.f5 .sprockets span{
+  display:block; background:#1a1612;
+  border-radius: 2px;
+}
+.f5 .grease{
+  position:absolute; pointer-events:none;
+  border: 5px solid #d6443c;
+  border-radius: 50%;
+  z-index:3;
+}
+.f5 .grease::after{
+  content:"★"; position:absolute;
+  top:-32px; right:-8px;
+  font-family:'Orbitron',sans-serif; font-weight:900;
+  color:#d6443c;
+  transform: rotate(8deg);
+}
+.f5 .label-card{
+  position:absolute; z-index:4;
+  background:#f6e8c4;
+  color:#1a1612;
+  padding: 14px 18px;
+  box-shadow: 0 12px 28px rgba(0,0,0,.5);
+  transform: rotate(-1.5deg);
+  font-family:'JetBrains Mono','Courier New',monospace;
+}
+.f5 .label-card::before{
+  content:""; position:absolute;
+  top: -12px; left: 50%; transform: translateX(-50%) rotate(2deg);
+  width: 78px; height: 18px;
+  background: rgba(214,68,60,.55);
+  border-left: 1px dashed rgba(0,0,0,.25);
+  border-right: 1px dashed rgba(0,0,0,.25);
+}
+.f5 .label-card .row{
+  display:grid; grid-template-columns: 96px 1fr;
+  gap: 16px;
+  padding: 6px 0;
+  border-bottom: 1px dashed rgba(26,22,18,.25);
+}
+.f5 .label-card .row:last-child{ border-bottom:none }
+.f5 .label-card .lbl{ color:#a04036; letter-spacing:.16em; text-transform:uppercase }
+.f5 .label-card .val{ color:#1a1612; font-weight:700; letter-spacing:.04em }
+
+/* ===== TEMPLATE 6 — Cinema Marquee Poster ===== */
+.f6{ background:#000 }
+.f6 .photo{
+  position:absolute; inset:0;
+  background-size: cover; background-position: center;
+  filter: grayscale(.3) contrast(1.1) brightness(.8);
+}
+.f6 .photo::after{
+  content:""; position:absolute; inset:0;
+  background:
+    radial-gradient(ellipse at 50% 35%, transparent 0%, rgba(5,1,15,.7) 80%),
+    linear-gradient(180deg, rgba(255,42,138,.2), rgba(106,43,255,.25));
+  mix-blend-mode: multiply;
+}
+.f6 .bulbs{
+  position:absolute; pointer-events:none;
+}
+.f6 .bulb{
+  position:absolute; border-radius:50%;
+  background: radial-gradient(circle at 35% 30%, #fff, #ffd86b 50%, #ff6ec7 100%);
+  box-shadow: 0 0 12px #ffd86b, 0 0 24px #ff6ec7;
+}
+.f6 .marquee-frame{
+  position:absolute;
+  border: 4px solid var(--sun-1);
+  box-shadow:
+    inset 0 0 0 2px rgba(0,0,0,.6),
+    inset 0 0 30px rgba(255,42,138,.3),
+    0 0 30px rgba(255,216,107,.4);
+}
+.f6 .topline{
+  position:absolute; left:0; right:0;
+  text-align:center; z-index: 3;
+  font-family:'Orbitron',sans-serif; font-weight:700;
+  letter-spacing:.42em; text-transform:uppercase; color: var(--sun-1);
+  text-shadow: 0 0 12px var(--sun-1);
+}
+.f6 .presents{
+  position:absolute; left:0; right:0;
+  text-align:center; z-index: 3;
+  font-family:'Inter',sans-serif; font-weight:300; font-style:italic;
+  color:#cbb9e7;
+}
+.f6 .billing{
+  position:absolute; left:0; right:0;
+  text-align:center; z-index: 3;
+  font-family:'Monoton',cursive; color:#fff;
+  letter-spacing:.02em; line-height:.95;
+  text-shadow: 0 0 6px #fff, 0 0 22px var(--pink), 0 0 50px var(--pink-2);
+}
+.f6 .feature{
+  position:absolute; left:0; right:0;
+  text-align:center; z-index: 3;
+  font-family:'Orbitron',sans-serif; font-weight:900;
+  color: var(--sun-1); letter-spacing:.08em;
+  text-shadow: 0 0 12px rgba(255,216,107,.6);
+}
+.f6 .ticket{
+  position:absolute; left:50%; transform: translateX(-50%);
+  z-index:3;
+  border: 2px dashed var(--sun-1);
+  padding: 12px 28px;
+  font-family:'Orbitron',sans-serif; font-weight:700;
+  letter-spacing:.22em; text-transform:uppercase; color: var(--sun-1);
+  background: rgba(0,0,0,.4);
+}
+.f6 .credits{
+  position:absolute; left:0; right:0; bottom:0;
+  text-align:center; z-index:3;
+  font-family:'Orbitron',sans-serif; font-weight:500;
+  letter-spacing:.32em; text-transform:uppercase; color:#a89cc4;
+}
+
+/* ===== TEMPLATE 3 — Art Deco Invitation (private event) ===== */
+.f3{
+  --deco-navy: #0e1a33;
+  --deco-navy-2: #122247;
+  --deco-gold: #c9a35e;
+  --deco-gold-2: #e6c98a;
+  --deco-cream: #f6e8c4;
+  background:
+    radial-gradient(ellipse at 50% 40%, var(--deco-navy-2) 0%, var(--deco-navy) 70%);
+}
+.f3 .frame-outer, .f3 .frame-inner{
+  position:absolute; pointer-events:none;
+  border: 1px solid var(--deco-gold);
+}
+.f3 .frame-double{
+  position:absolute; pointer-events:none;
+}
+.f3 .frame-double::before, .f3 .frame-double::after{
+  content:""; position:absolute; inset:0;
+  border: 1px solid rgba(201,163,94,.55);
+}
+.f3 .frame-double::after{ inset: 5px; border-color: rgba(201,163,94,.9) }
+.f3 .corner{
+  position:absolute; pointer-events:none;
+  width: 64px; height: 64px;
+}
+.f3 .corner svg{ width:100%; height:100%; display:block }
+.f3 .content{
+  position:absolute; left:0; right:0;
+  text-align:center;
+  z-index:2;
+}
+.f3 .invite-eyebrow{
+  font-family:'Orbitron',sans-serif; font-weight:500;
+  letter-spacing:.5em; text-transform:uppercase; color: var(--deco-gold-2);
+}
+.f3 .host{
+  font-family:'Orbitron',sans-serif; font-weight:900;
+  color: var(--deco-cream);
+  letter-spacing:.05em; line-height:1.05;
+  text-shadow: 0 1px 0 rgba(0,0,0,.4);
+}
+.f3 .ampersand{
+  font-family:'Monoton',cursive;
+  color: var(--deco-gold);
+  display:inline-block;
+  padding: 0 .15em;
+}
+.f3 .occasion{
+  font-family:'Inter',sans-serif; font-weight:300; font-style:italic;
+  color: var(--deco-cream);
+  letter-spacing:.04em;
+}
+.f3 .deco-divider{
+  display:flex; align-items:center; justify-content:center; gap: 18px;
+  margin: 0 auto;
+}
+.f3 .deco-divider .line{ flex:1; max-width: 28%; height:1px; background: var(--deco-gold) }
+.f3 .deco-divider .diamond{
+  width: 10px; height: 10px;
+  background: var(--deco-gold); transform: rotate(45deg);
+  box-shadow: 0 0 0 3px var(--deco-navy), 0 0 0 4px var(--deco-gold);
+}
+.f3 .date-stack{
+  display:flex; flex-direction:column; align-items:center; gap: 4px;
+}
+.f3 .date-stack .weekday{
+  font-family:'Orbitron',sans-serif; font-weight:500;
+  letter-spacing:.42em; text-transform:uppercase; color: var(--deco-gold-2);
+}
+.f3 .date-stack .day{
+  font-family:'Orbitron',sans-serif; font-weight:900;
+  color: var(--deco-cream);
+  line-height:1;
+}
+.f3 .date-stack .month{
+  font-family:'Orbitron',sans-serif; font-weight:500;
+  letter-spacing:.32em; text-transform:uppercase; color: var(--deco-gold-2);
+}
+.f3 .info{display:flex; flex-direction:column; gap:4px; align-items:center}
+.f3 .info .lbl{
+  font-family:'Orbitron',sans-serif; font-weight:500;
+  letter-spacing:.4em; text-transform:uppercase; color: var(--deco-gold-2);
+}
+.f3 .info .val{
+  font-family:'Orbitron',sans-serif; font-weight:700; color: var(--deco-cream);
+}
+.f3 .info .sub{
+  font-family:'Inter',sans-serif; color: rgba(246,232,196,.7); font-style:italic;
+}
+.f3 .closer{
+  font-family:'Orbitron',sans-serif; font-weight:500;
+  letter-spacing:.42em; text-transform:uppercase; color: var(--deco-gold);
+}
+.f3 .with{
+  font-family:'Inter',sans-serif; color: rgba(246,232,196,.6); font-style:italic;
+}
+
+/* ===== TEMPLATE 4B — Editorial Cover (private alt photo hero) ===== */
+.f4b{ background:#0a0a14 }
+.f4b .photo{
+  position:absolute; left:0; right:0; top:0;
+  background-size: cover; background-position: center;
+  filter: contrast(1.05) saturate(.95);
+}
+.f4b .photo::after{
+  content:""; position:absolute; inset:0;
+  background: linear-gradient(180deg, rgba(10,10,20,.25) 0%, transparent 25%, transparent 75%, rgba(10,10,20,.6) 100%);
+}
+.f4b .masthead{
+  position:absolute; left:0; right:0; top:0;
+  display:flex; justify-content:space-between; align-items:flex-start;
+  z-index: 3;
+}
+.f4b .masthead .vol{
+  font-family:'Orbitron',sans-serif; font-weight:700;
+  letter-spacing:.32em; text-transform:uppercase; color:#f6e7c8;
+}
+.f4b .masthead .issue{
+  font-family:'Orbitron',sans-serif; font-weight:500;
+  letter-spacing:.42em; text-transform:uppercase; color:#f6e7c8;
+  text-align:right;
+}
+.f4b .pink-bar{
+  position:absolute; right: 0; top: 0; bottom: 0;
+  background: linear-gradient(180deg, transparent 0%, var(--pink) 35%, var(--violet) 100%);
+  z-index: 2;
+}
+.f4b .typeblock{
+  position:absolute; left:0; right:0; bottom:0;
+  background:#0a0a14;
+  z-index: 3;
+  display:flex; flex-direction:column;
+  border-top: 2px solid #f6e7c8;
+}
+.f4b .typeblock .masthead-title{
+  font-family:'Orbitron',sans-serif; font-weight:900;
+  color:#f6e7c8; letter-spacing:-.02em; line-height:.88;
+  text-transform:uppercase;
+  white-space:nowrap;
+}
+.f4b .typeblock .kicker{
+  font-family:'Orbitron',sans-serif; font-weight:500;
+  letter-spacing:.42em; text-transform:uppercase; color: var(--pink);
+}
+.f4b .typeblock .feature{
+  font-family:'Inter',sans-serif; font-weight:300; font-style:italic;
+  color: #cbb9e7;
+}
+.f4b .typeblock .meta-grid{
+  display:grid; grid-template-columns: repeat(3, 1fr);
+  border-top: 1px solid rgba(246,231,200,.18);
+}
+.f4b .typeblock .meta-cell{
+  display:flex; flex-direction:column; gap:6px;
+  padding: 20px 24px;
+  border-right: 1px solid rgba(246,231,200,.18);
+}
+.f4b .typeblock .meta-cell:last-child{ border-right:none }
+.f4b .typeblock .meta-cell .lbl{
+  font-family:'Orbitron',sans-serif; font-weight:500;
+  letter-spacing:.32em; text-transform:uppercase; color:#a89cc4;
+}
+.f4b .typeblock .meta-cell .val{
+  font-family:'Orbitron',sans-serif; font-weight:700; color:#f6e7c8;
+}
+.f4b .typeblock .footer{
+  display:flex; justify-content:space-between; align-items:center;
+  border-top: 1px solid rgba(246,231,200,.18);
+  font-family:'Inter',sans-serif; color:#a89cc4;
+}
+</style>
+</head>
+<body>
+
+<!-- Gate auth check — runs BEFORE React scripts so toggling happens immediately -->
+<script>
+(function(){
+  if (localStorage.getItem('art_admin_auth') === '1') {
+    // already authenticated — will hide gate and show app after DOM is ready
+    document.addEventListener('DOMContentLoaded', function(){
+      var g = document.getElementById('gate-overlay');
+      var a = document.getElementById('app-wrapper');
+      if (g) g.style.display = 'none';
+      if (a) a.style.display = 'block';
+    });
+  }
+})();
+</script>
+
+<!-- Password Gate -->
+<div id="gate-overlay">
+  <div class="gate-card">
+    <svg class="gate-logo" viewBox="0 0 320 96" style="height:48px" aria-label="ARTIFICIOS">
+      <defs>
+        <linearGradient id="gp2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff6ec7"/><stop offset="1" stop-color="#ff2a8a"/></linearGradient>
+        <linearGradient id="gv2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#22e8ff"/><stop offset="1" stop-color="#6a2bff"/></linearGradient>
+      </defs>
+      <g transform="translate(160 78)">
+        <path d="M 0 0 L -150 -10 L -140 -28 Z" fill="url(#gp2)"/>
+        <path d="M 0 0 L -120 -42 L -100 -55 Z" fill="url(#gv2)"/>
+        <path d="M 0 0 L -80 -62 L -55 -70 Z" fill="url(#gp2)"/>
+        <path d="M 0 0 L -38 -74 L -12 -78 Z" fill="url(#gv2)"/>
+        <path d="M 0 0 L 12 -78 L 38 -74 Z" fill="url(#gp2)"/>
+        <path d="M 0 0 L 55 -70 L 80 -62 Z" fill="url(#gv2)"/>
+        <path d="M 0 0 L 100 -55 L 120 -42 Z" fill="url(#gp2)"/>
+        <path d="M 0 0 L 140 -28 L 150 -10 Z" fill="url(#gv2)"/>
+      </g>
+      <text x="160" y="60" text-anchor="middle" font-family="Orbitron, sans-serif" font-weight="900" font-size="34" letter-spacing="6" fill="#fff" style="paint-order:stroke;stroke:#05010f;stroke-width:5;stroke-linejoin:round">ARTIFICIOS</text>
+      <circle cx="196" cy="34" r="2.4" fill="#22e8ff"/>
+    </svg>
+    <div class="gate-eyebrow">Acceso Administrador</div>
+    <input class="gate-input" id="gate-pw" type="password" placeholder="••••••••••••••" autocomplete="current-password" />
+    <button class="gate-btn" id="gate-submit">Ingresar</button>
+    <div class="gate-error" id="gate-error"></div>
+  </div>
+</div>
+<script>
+(function(){
+  var PASS = 'artificios2026';
+  var btn = document.getElementById('gate-submit');
+  var inp = document.getElementById('gate-pw');
+  var err = document.getElementById('gate-error');
+  function tryAuth(){
+    if (inp.value === PASS) {
+      localStorage.setItem('art_admin_auth','1');
+      document.getElementById('gate-overlay').style.display = 'none';
+      document.getElementById('app-wrapper').style.display = 'block';
+    } else {
+      err.textContent = 'Contraseña incorrecta';
+      inp.value = '';
+      inp.focus();
+    }
+  }
+  btn.addEventListener('click', tryAuth);
+  inp.addEventListener('keydown', function(e){ if (e.key === 'Enter') tryAuth(); if (err.textContent) err.textContent=''; });
+})();
+</script>
+
+<div id="app-wrapper">
+<div class="page">
+  <div class="page-head" style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:28px">
+    <div>
+      <h1>ARTIFICIOS · Flyer Templates</h1>
+      <p>Eight flyer styles, each in three sizes (Instagram post · Instagram story · A4 print).
+         Each flyer has its <strong>own form panel</strong> right above its previews — edit the fields and the flyer updates live.
+         <strong>Your edits auto-save</strong> to this browser and stay across reloads (use the Reset button to start over).
+         Hit <strong>Download PNG</strong> on any size to export.</p>
+    </div>
+    <button class="logout-link" onclick="localStorage.removeItem('art_admin_auth'); location.reload()">Cerrar sesión →</button>
+  </div>
+  <div id="root"></div>
+</div>
+
+<script type="text/babel">
+const { useState, useRef, useCallback, useMemo, useEffect } = React;
+
+/* ─────────── Logo (combined SVG, same as nav/footer) ─────────── */
+function BrandLogo({ width = 320, monoStroke = '#05010f' }){
+  return (
+    <svg viewBox="0 0 320 96" xmlns="http://www.w3.org/2000/svg" style={{width, height:'auto', display:'block'}}>
+      <g transform="translate(160 78)">
+        <path d="M 0 0 L -150 -10 L -140 -28 Z" fill="#ff2a8a" opacity=".95"/>
+        <path d="M 0 0 L -120 -42 L -100 -55 Z" fill="#6a2bff" opacity=".95"/>
+        <path d="M 0 0 L -80 -62 L -55 -70 Z" fill="#ff2a8a" opacity=".95"/>
+        <path d="M 0 0 L -38 -74 L -12 -78 Z" fill="#6a2bff" opacity=".95"/>
+        <path d="M 0 0 L 12 -78 L 38 -74 Z" fill="#ff2a8a" opacity=".95"/>
+        <path d="M 0 0 L 55 -70 L 80 -62 Z" fill="#6a2bff" opacity=".95"/>
+        <path d="M 0 0 L 100 -55 L 120 -42 Z" fill="#ff2a8a" opacity=".95"/>
+        <path d="M 0 0 L 140 -28 L 150 -10 Z" fill="#6a2bff" opacity=".95"/>
+      </g>
+      <text x="160" y="60"
+        textAnchor="middle"
+        fontFamily="Orbitron, sans-serif"
+        fontWeight="900"
+        fontSize="34"
+        letterSpacing="6"
+        fill="#ffffff"
+        style={{paintOrder:'stroke', stroke:monoStroke, strokeWidth:5, strokeLinejoin:'round'}}
+      >ARTIFICIOS</text>
+      <circle cx="196" cy="34" r="2.4" fill="#22e8ff"/>
+    </svg>
+  );
+}
+
+/* ─────────── Neon halo (SVG glow blob behind neon text) ─────────── */
+let __haloId = 0;
+function NeonHalo({ color = '#ff2a8a', color2 = '#ff6ec7', extend = '60%', style }){
+  const id = useMemo(() => 'halo-' + (++__haloId), []);
+  // Positioned absolutely; pushes outward via negative inset so the glow
+  // extends well past the text it's hugging.
+  const wrapStyle = {
+    position: 'absolute',
+    left: `-${extend}`, right: `-${extend}`,
+    top: `-${extend}`, bottom: `-${extend}`,
+    pointerEvents: 'none',
+    zIndex: 0,
+    ...style,
+  };
+  return (
+    <div style={wrapStyle}>
+      <svg viewBox="0 0 100 60" preserveAspectRatio="none"
+        style={{width:'100%', height:'100%', display:'block'}}>
+        <defs>
+          <radialGradient id={id} cx="50%" cy="50%" r="50%">
+            <stop offset="0%"   stopColor={color}  stopOpacity="0.75"/>
+            <stop offset="22%"  stopColor={color2} stopOpacity="0.55"/>
+            <stop offset="55%"  stopColor={color}  stopOpacity="0.18"/>
+            <stop offset="100%" stopColor={color}  stopOpacity="0"/>
+          </radialGradient>
+        </defs>
+        <rect width="100" height="60" fill={`url(#${id})`}/>
+      </svg>
+    </div>
+  );
+}
+
+function BigSunburst({ rays = 36 }){
+  const paths = [];
+  for(let i=0; i<rays; i++){
+    const a1 = (i/rays)*Math.PI*2, a2 = ((i+0.92)/rays)*Math.PI*2;
+    const r = 700;
+    paths.push(<path key={i}
+      d={`M 0 0 L ${(Math.cos(a1)*r).toFixed(1)} ${(Math.sin(a1)*r).toFixed(1)} L ${(Math.cos(a2)*r).toFixed(1)} ${(Math.sin(a2)*r).toFixed(1)} Z`}
+      fill={i%2===0?'#ff2a8a':'#6a2bff'} opacity={i%2===0?0.92:0.85}/>);
+  }
+  return (
+    <svg viewBox="-700 -700 1400 1400" xmlns="http://www.w3.org/2000/svg" style={{width:'100%',height:'100%'}}>
+      <g>{paths}</g>
+      <defs>
+        <radialGradient id="sg" cx="0" cy="-0.3" r="1">
+          <stop offset="0" stopColor="#ffd86b"/>
+          <stop offset=".55" stopColor="#ff6ec7"/>
+          <stop offset="1" stopColor="#6a2bff"/>
+        </radialGradient>
+      </defs>
+      <circle r="180" fill="url(#sg)"/>
+      <g stroke="#05010f" strokeWidth="6" strokeLinecap="round">
+        <line x1="-150" y1="20" x2="150" y2="20"/>
+        <line x1="-130" y1="60" x2="130" y2="60"/>
+        <line x1="-100" y1="100" x2="100" y2="100"/>
+        <line x1="-60" y1="140" x2="60" y2="140"/>
+      </g>
+    </svg>
+  );
+}
+
+/* ─────────── Default content ─────────── */
+const DEFAULTS = {
+  // Single gig
+  eventName: "NOCHE 80'S",
+  date1: "Sábado 14 · Junio",
+  time1: "23:00 hs",
+  venue1: "La Trastienda",
+  address1: "Balcarce 460 · San Telmo · CABA",
+  ticket1: "Entradas en passline.com",
+  showLogo: true,   // single-gig: show the combined ARTIFICIOS logo at top
+  showTitle: true,  // single-gig: show the big ARTIFICIOS wordmark
+  topline: "Tributo 80's · En vivo",  // editable text beneath the logo
+  toplineColor:  "#22e8ff",  // 01  Full Neon
+  toplineColorB: "#e8c79a",  // 01B Warm Dusk
+  toplineColorC: "#c2ff4a",  // 01C Laser Lime
+  toplineColorD: "#8fe9e0",  // 01D Vaporwave Pastel
+
+  // Multi-date tour
+  tourTitle: "TOUR · OTOÑO 2026",
+  tourSub: "Tributo 80's en vivo · 6 músicos en escena",
+  dates: [
+    { day: "07 / 06", venue: "La Trastienda", addr: "San Telmo · CABA", time: "23:00" },
+    { day: "21 / 06", venue: "Niceto Club",   addr: "Palermo · CABA",  time: "00:00" },
+    { day: "05 / 07", venue: "Teatro Vorterix", addr: "Colegiales · CABA", time: "22:00" },
+    { day: "19 / 07", venue: "Quality Espacio", addr: "Córdoba Capital", time: "23:00" },
+  ],
+  tourCta: "Reservas · WhatsApp +54 9 11 6272-7850",
+
+  // Private event
+  hostLine: "Lucas & Carolina",
+  occasion: "celebran sus 40 años",
+  pDate: "Viernes 22 · Agosto · 2026",
+  pTime: "21:00 hs",
+  pVenue: "Estancia La Candelaria",
+  pAddr: "Lobos · Provincia de Buenos Aires",
+  pCloser: "Show en vivo a las 23:30",
+
+  // Photo hero (Template 4)
+  hPhoto: "assets/photo-stage-crowd.jpg",
+  hBadge: "En vivo",
+  hHeadline: "NOCHE 80'S",
+  hDate: "S\u00e1bado 14 \u00b7 Junio",
+  hTime: "23:00 hs",
+  hVenue: "La Trastienda",
+  hFooter: "Entradas en passline.com \u00b7 +54 9 11 6272-7850",
+  hVol: "VOL \u00b7 XII",          // 04B editorial cover — top-left masthead
+  hSeason: "OTO\u00d1O \u00b7 26",     // 04B editorial cover — top-right under badge
+  hFeature: "una noche, una banda, todos los himnos.",  // 04B — tagline beneath ARTIFICIOS
+  hCoverTitle: "NOCHE 80'S",  // 04B — title shown between the signs « »
+  hQuoteOpen: "«",   // 04B — sign before the title
+  hQuoteClose: "»",  // 04B — sign after the headline
+  hSep: "—",         // 04B — separator between headline and tagline
+
+  // Polaroid collage (Template 5)
+  cTitle: "Vol\u00f3 una d\u00e9cada",
+  cSub: "FIESTA RETRO",
+  // Collage / contact-sheet photos
+  cPhotos: ["assets/photo-singer.jpg", "assets/photo-guitar-curly.jpg", "assets/photo-bass.jpg", "assets/photo-singer-fan.jpg"],
+  cDate: "VIE 14 \u00b7 JUN",
+  cTime: "23:00 hs",
+  cVenue: "Niceto Club",
+  cAddr: "Niceto Vega 5510 \u00b7 CABA",
+
+  // Cinema marquee (Template 6)
+  mPhoto: "assets/photo-marquee.jpg",
+  mPresents: "Una sola noche \u00b7 una sola banda",
+  mFeature: "Tributo en vivo a los 80's",
+  mDate: "S\u00c1B 14 / JUN / 2026",
+  mVenue: "Teatro Vorterix \u00b7 Buenos Aires",
+  mTicket: "Entradas \u00b7 22:00 hs",
+  mTopline: "\u2605 \u2605 \u2605   UNA NOCHE \u00daNICA   \u2605 \u2605 \u2605",
+  mCredits: "Artificios \u00b7 EST 2014 \u00b7 Buenos Aires \u00b7 artificiosbanda@gmail.com",
+};
+
+/* ─────────── Small text-input helpers ─────────── */
+function Field({ label, value, onChange, wide, area }){
+  return (
+    <div className={`t ${wide?'wide':''}`}>
+      <label>{label}</label>
+      {area
+        ? <textarea value={value} onChange={e=>onChange(e.target.value)} />
+        : <input value={value} onChange={e=>onChange(e.target.value)} />
+      }
+    </div>
+  );
+}
+
+function Check({ label, checked, onChange }){
+  return (
+    <label className="t check">
+      <input type="checkbox" checked={!!checked} onChange={e=>onChange(e.target.checked)} />
+      <span>{label}</span>
+    </label>
+  );
+}
+
+function ColorField({ label, value, onChange, wide }){
+  return (
+    <div className={`t color ${wide?'wide':''}`}>
+      <label>{label}</label>
+      <div className="color-row">
+        <input type="color" value={value} onChange={e=>onChange(e.target.value)} />
+        <input className="hex" value={value} onChange={e=>onChange(e.target.value)} />
+      </div>
+    </div>
+  );
+}
+
+/* ─────────── Sizes ─────────── */
+const SIZES = {
+  igPost:  { w: 1080, h: 1080, label: "IG Post · 1080×1080", scale: 0.32 },
+  igStory: { w: 1080, h: 1920, label: "IG Story · 1080×1920", scale: 0.22 },
+  a4:      { w: 1240, h: 1754, label: "A4 · 150 DPI",          scale: 0.24 },
+};
+
+/* ─────────── Flyer wrapper with download ─────────── */
+
+// Try html-to-image first, fall back to html2canvas — Template 1 (neon) has
+// CSS the html-to-image foreignObject pipeline doesn't handle cleanly, so we
+// need html2canvas as a second pass for it.
+async function captureNode(node, size){
+  // Wait for our pre-fetched data-URI fonts (Monoton) to be registered.
+  if (window.__fontsReady) {
+    try { await window.__fontsReady; } catch {}
+  }
+  // Then wait for the regular FontFaceSet, in case any Google Fonts are still loading.
+  if (document.fonts && document.fonts.ready) await document.fonts.ready;
+  await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+
+  // 1) Primary: html-to-image (fast, accurate text-shadow / gradients)
+  try {
+    const dataUrl = await window.htmlToImage.toPng(node, {
+      width: size.w, height: size.h,
+      canvasWidth: size.w, canvasHeight: size.h,
+      pixelRatio: 1,
+      cacheBust: true,
+      style: { transform: 'none', margin: 0, transformOrigin: 'top left' }
+    });
+    if (dataUrl && dataUrl.length > 5000) return dataUrl;
+    throw new Error('html-to-image returned empty image');
+  } catch (err) {
+    console.warn('html-to-image failed, falling back to html2canvas:', err);
+  }
+
+  // 2) Fallback: html2canvas — render a full-size clone offscreen
+  if (!window.html2canvas) throw new Error('html2canvas not loaded');
+  const clone = node.cloneNode(true);
+  const wrap = document.createElement('div');
+  wrap.style.cssText =
+    `position:fixed; left:-99999px; top:0; width:${size.w}px; height:${size.h}px; pointer-events:none; z-index:-1;`;
+  clone.style.transform = 'none';
+  clone.style.transformOrigin = 'top left';
+  clone.style.width = size.w + 'px';
+  clone.style.height = size.h + 'px';
+  wrap.appendChild(clone);
+  document.body.appendChild(wrap);
+  try {
+    const canvas = await window.html2canvas(clone, {
+      width: size.w, height: size.h,
+      windowWidth: size.w, windowHeight: size.h,
+      backgroundColor: null,
+      useCORS: true,
+      allowTaint: true,
+      logging: false,
+      scale: 1
+    });
+    return canvas.toDataURL('image/png');
+  } finally {
+    document.body.removeChild(wrap);
+  }
+}
+
+function FlyerSlot({ size, name, render }){
+  const ref = useRef(null);
+  const [busy, setBusy] = useState(false);
+
+  const download = useCallback(async () => {
+    if (!ref.current) return;
+    setBusy(true);
+    try{
+      const dataUrl = await captureNode(ref.current, size);
+      if (!dataUrl || dataUrl.length < 5000) {
+        throw new Error('Export produced an empty image. Try again.');
+      }
+      const a = document.createElement('a');
+      a.href = dataUrl;
+      a.download = `artificios-${name}.png`;
+      a.click();
+    }catch(e){ console.error(e); alert('Export error: ' + (e && e.message ? e.message : e)); }
+    setBusy(false);
+  }, [size, name]);
+
+  // shrink wrapper to scaled size so layout flows
+  const wrapStyle = {
+    width: size.w * size.scale,
+    height: size.h * size.scale,
+  };
+  const flyerStyle = {
+    width: size.w,
+    height: size.h,
+    transform: `scale(${size.scale})`,
+  };
+
+  return (
+    <div className="size-wrap">
+      <div className="size-label" style={{width: size.w * size.scale}}>
+        <span>{size.label}</span>
+        <button className="dl-btn" onClick={download} disabled={busy}>
+          {busy ? 'Exporting…' : 'Download PNG'}
+        </button>
+      </div>
+      <div className="flyer-shrink" style={wrapStyle}>
+        <div className="flyer" ref={ref} style={flyerStyle}>
+          {render(size)}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ─────────── TEMPLATE 1 — Single Gig (full neon) ─────────── */
+function Template1({ data, size }){
+  const W = size.w, H = size.h;
+  const isStory = H > W;
+  // "Artificios" in Monoton measures ~6.45× fontSize wide. With 8% side
+  // padding the available width is 84% W → max fontSize ≈ W * 0.13.
+  // Use W * 0.125 uniformly (IG Post and IG Story share the same width).
+  const padX = W * 0.08;
+  const titleSize = W * 0.125;
+  const evSize = isStory ? W * 0.075 : W * 0.065;
+  const sunSize = isStory ? W * 0.85 : W * 0.7;
+  const sunTop = isStory ? H * 0.50 : H * 0.45;
+
+  return (
+    <div className="f1 scanlines" style={{position:'absolute', inset:0}}>
+      <div className="stars"></div>
+      <div className="sun" style={{
+        width: sunSize, height: sunSize,
+        top: sunTop,
+        transform: 'translate(-50%, -50%)',
+      }}></div>
+      <div className="grid-floor"></div>
+      <div className="frame" style={{
+        left: padX*0.5, top: padX*0.5, right: padX*0.5, bottom: padX*0.5
+      }}></div>
+
+      {/* Top: brand + topline */}
+      <div className="content" style={{top: H*0.06}}>
+        {data.showLogo && (
+          <div style={{display:'flex', justifyContent:'center', marginBottom: 12}}>
+            <BrandLogo width={W*0.26} monoStroke="#1a0542"/>
+          </div>
+        )}
+        <div className="topline" style={{fontSize: W*0.018, color: data.toplineColor}}>
+          {data.topline}
+        </div>
+      </div>
+
+      {/* Middle: title */}
+      {data.showTitle && (
+      <div className="content" style={{top: isStory ? H*0.32 : H*0.28, padding:`0 ${padX}px`}}>
+        <div style={{position:'relative', display:'inline-block'}}>
+          <NeonHalo color="#ff2a8a" color2="#ff6ec7" extend="35%"/>
+          <div className="neon-title" style={{fontSize: titleSize, whiteSpace:'nowrap', position:'relative', zIndex:1}}>Artificios</div>
+        </div>
+      </div>
+      )}
+
+      {/* Event */}
+      <div className="content" style={{top: isStory ? H*0.55 : H*0.50}}>
+        <div className="event" style={{fontSize: evSize, padding: `0 ${padX}px`}}>{data.eventName}</div>
+      </div>
+
+      {/* Info block */}
+      <div className="content" style={{top: isStory ? H*0.72 : H*0.66, padding: `0 ${padX}px`}}>
+        <div className="info-block" style={{flexWrap: isStory?'wrap':'nowrap'}}>
+          <div className="info">
+            <div className="lbl" style={{fontSize: W*0.017}}>Fecha</div>
+            <div className="val" style={{fontSize: W*0.030}}>{data.date1}</div>
+          </div>
+          <div className="info">
+            <div className="lbl" style={{fontSize: W*0.017}}>Hora</div>
+            <div className="val" style={{fontSize: W*0.030}}>{data.time1}</div>
+          </div>
+          <div className="info">
+            <div className="lbl" style={{fontSize: W*0.017}}>Lugar</div>
+            <div className="val" style={{fontSize: W*0.030}}>{data.venue1}</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Bottom: address + ticket */}
+      <div className="content" style={{bottom: H*0.06}}>
+        <div style={{
+          fontFamily:"'Inter',sans-serif", color:'#cbb9e7', fontSize: W*0.024,
+          marginBottom: 10, padding: `0 ${padX}px`
+        }}>{data.address1}</div>
+        <div style={{
+          fontFamily:"'Orbitron',sans-serif", fontWeight:700,
+          color: 'var(--cyan)', fontSize: W*0.024,
+          letterSpacing:'.18em', textTransform:'uppercase'
+        }}>{data.ticket1}</div>
+      </div>
+    </div>
+  );
+}
+
+/* ─────────── TEMPLATE 1C — Single Gig (laser lime / electric blue) ─────────── */
+function Template1C({ data, size }){
+  const W = size.w, H = size.h;
+  const isStory = H > W;
+  const padX = W * 0.08;
+  const titleSize = W * 0.125;
+  const evSize = isStory ? W * 0.075 : W * 0.065;
+  const sunSize = isStory ? W * 0.85 : W * 0.7;
+  const sunTop = isStory ? H * 0.50 : H * 0.45;
+
+  return (
+    <div className="f1c scanlines" style={{position:'absolute', inset:0}}>
+      <div className="stars"></div>
+      <div className="sun" style={{
+        width: sunSize, height: sunSize,
+        top: sunTop,
+        transform: 'translate(-50%, -50%)',
+      }}></div>
+      <div className="grid-floor"></div>
+      <div className="frame" style={{
+        left: padX*0.5, top: padX*0.5, right: padX*0.5, bottom: padX*0.5
+      }}></div>
+
+      {/* Top: brand + topline */}
+      <div className="content" style={{top: H*0.06}}>
+        {data.showLogo && (
+          <div style={{display:'flex', justifyContent:'center', marginBottom: 12}}>
+            <BrandLogo width={W*0.26} monoStroke="#052233"/>
+          </div>
+        )}
+        <div className="topline" style={{fontSize: W*0.018, color: data.toplineColorC}}>
+          {data.topline}
+        </div>
+      </div>
+
+      {/* Middle: title */}
+      {data.showTitle && (
+      <div className="content" style={{top: isStory ? H*0.32 : H*0.28, padding:`0 ${padX}px`}}>
+        <div style={{position:'relative', display:'inline-block'}}>
+          <NeonHalo color="#36e0ff" color2="#9af2ff" extend="35%"/>
+          <div className="neon-title" style={{fontSize: titleSize, whiteSpace:'nowrap', position:'relative', zIndex:1}}>Artificios</div>
+        </div>
+      </div>
+      )}
+
+      {/* Event */}
+      <div className="content" style={{top: isStory ? H*0.55 : H*0.50}}>
+        <div className="event" style={{fontSize: evSize, padding: `0 ${padX}px`}}>{data.eventName}</div>
+      </div>
+
+      {/* Info block */}
+      <div className="content" style={{top: isStory ? H*0.72 : H*0.66, padding: `0 ${padX}px`}}>
+        <div className="info-block" style={{flexWrap: isStory?'wrap':'nowrap'}}>
+          <div className="info">
+            <div className="lbl" style={{fontSize: W*0.017}}>Fecha</div>
+            <div className="val" style={{fontSize: W*0.030}}>{data.date1}</div>
+          </div>
+          <div className="info">
+            <div className="lbl" style={{fontSize: W*0.017}}>Hora</div>
+            <div className="val" style={{fontSize: W*0.030}}>{data.time1}</div>
+          </div>
+          <div className="info">
+            <div className="lbl" style={{fontSize: W*0.017}}>Lugar</div>
+            <div className="val" style={{fontSize: W*0.030}}>{data.venue1}</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Bottom: address + ticket */}
+      <div className="content" style={{bottom: H*0.06}}>
+        <div style={{
+          fontFamily:"'Inter',sans-serif", color:'#b9ecff', fontSize: W*0.024,
+          marginBottom: 10, padding: `0 ${padX}px`
+        }}>{data.address1}</div>
+        <div style={{
+          fontFamily:"'Orbitron',sans-serif", fontWeight:700,
+          color: '#c2ff4a', fontSize: W*0.024,
+          letterSpacing:'.18em', textTransform:'uppercase'
+        }}>{data.ticket1}</div>
+      </div>
+    </div>
+  );
+}
+
+/* ─────────── TEMPLATE 1D — Single Gig (vaporwave pastel) ─────────── */
+function Template1D({ data, size }){
+  const W = size.w, H = size.h;
+  const isStory = H > W;
+  const padX = W * 0.08;
+  const titleSize = W * 0.125;
+  const evSize = isStory ? W * 0.075 : W * 0.065;
+  const sunSize = isStory ? W * 0.85 : W * 0.7;
+  const sunTop = isStory ? H * 0.50 : H * 0.45;
+
+  return (
+    <div className="f1d scanlines" style={{position:'absolute', inset:0}}>
+      <div className="stars"></div>
+      <div className="sun" style={{
+        width: sunSize, height: sunSize,
+        top: sunTop,
+        transform: 'translate(-50%, -50%)',
+      }}></div>
+      <div className="grid-floor"></div>
+      <div className="frame" style={{
+        left: padX*0.5, top: padX*0.5, right: padX*0.5, bottom: padX*0.5
+      }}></div>
+
+      {/* Top: brand + topline */}
+      <div className="content" style={{top: H*0.06}}>
+        {data.showLogo && (
+          <div style={{display:'flex', justifyContent:'center', marginBottom: 12}}>
+            <BrandLogo width={W*0.26} monoStroke="#2a1d4a"/>
+          </div>
+        )}
+        <div className="topline" style={{fontSize: W*0.018, color: data.toplineColorD}}>
+          {data.topline}
+        </div>
+      </div>
+
+      {/* Middle: title */}
+      {data.showTitle && (
+      <div className="content" style={{top: isStory ? H*0.32 : H*0.28, padding:`0 ${padX}px`}}>
+        <div style={{position:'relative', display:'inline-block'}}>
+          <NeonHalo color="#ff9ad8" color2="#d3b0ff" extend="35%"/>
+          <div className="neon-title" style={{fontSize: titleSize, whiteSpace:'nowrap', position:'relative', zIndex:1}}>Artificios</div>
+        </div>
+      </div>
+      )}
+
+      {/* Event */}
+      <div className="content" style={{top: isStory ? H*0.55 : H*0.50}}>
+        <div className="event" style={{fontSize: evSize, padding: `0 ${padX}px`}}>{data.eventName}</div>
+      </div>
+
+      {/* Info block */}
+      <div className="content" style={{top: isStory ? H*0.72 : H*0.66, padding: `0 ${padX}px`}}>
+        <div className="info-block" style={{flexWrap: isStory?'wrap':'nowrap'}}>
+          <div className="info">
+            <div className="lbl" style={{fontSize: W*0.017}}>Fecha</div>
+            <div className="val" style={{fontSize: W*0.030}}>{data.date1}</div>
+          </div>
+          <div className="info">
+            <div className="lbl" style={{fontSize: W*0.017}}>Hora</div>
+            <div className="val" style={{fontSize: W*0.030}}>{data.time1}</div>
+          </div>
+          <div className="info">
+            <div className="lbl" style={{fontSize: W*0.017}}>Lugar</div>
+            <div className="val" style={{fontSize: W*0.030}}>{data.venue1}</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Bottom: address + ticket */}
+      <div className="content" style={{bottom: H*0.06}}>
+        <div style={{
+          fontFamily:"'Inter',sans-serif", color:'#ecd6f4', fontSize: W*0.024,
+          marginBottom: 10, padding: `0 ${padX}px`
+        }}>{data.address1}</div>
+        <div style={{
+          fontFamily:"'Orbitron',sans-serif", fontWeight:700,
+          color: '#8fe9e0', fontSize: W*0.024,
+          letterSpacing:'.18em', textTransform:'uppercase'
+        }}>{data.ticket1}</div>
+      </div>
+    </div>
+  );
+}
+
+/* ─────────── TEMPLATE 1B — Single Gig (warm dusk / filmic) ─────────── */
+function Template1B({ data, size }){
+  const W = size.w, H = size.h;
+  const isStory = H > W;
+  // Orbitron 900 "ARTIFICIOS" measures ~6.66× fontSize wide; cap at W*0.12.
+  const padX = W * 0.08;
+  const titleSize = W * 0.12;
+  const evSize = isStory ? W * 0.04 : W * 0.034;
+
+  return (
+    <div className="f1b grain" style={{position:'absolute', inset:0}}>
+      <div className="sun" style={{
+        width: isStory ? W * 0.85 : W * 0.7,
+        height: isStory ? W * 0.85 : W * 0.7,
+        top: isStory ? H * 0.50 : H * 0.45,
+        transform: 'translate(-50%, -50%)',
+      }}></div>
+      <div className="grid-floor"></div>
+      <div className="frame" style={{
+        left: padX*0.5, top: padX*0.5, right: padX*0.5, bottom: padX*0.5
+      }}></div>
+
+      {/* Top: brand + topline */}
+      <div className="content" style={{top: H*0.06}}>
+        {data.showLogo && (
+          <div style={{display:'flex', justifyContent:'center', marginBottom: 12}}>
+            <BrandLogo width={W*0.26} monoStroke="#211522"/>
+          </div>
+        )}
+        <div className="topline" style={{fontSize: W*0.018, color: data.toplineColorB}}>
+          {data.topline}
+        </div>
+      </div>
+
+      {/* Middle: title */}
+      {data.showTitle && (
+      <div className="content" style={{top: isStory ? H*0.30 : H*0.27, padding:`0 ${padX}px`}}>
+        <div className="title" style={{fontSize: titleSize, whiteSpace:'nowrap'}}>ARTIFICIOS</div>
+        <div className="title-rule">
+          <div className="line"></div>
+          <div className="dot"></div>
+          <div className="line"></div>
+        </div>
+      </div>
+      )}
+
+      {/* Event */}
+      <div className="content" style={{top: isStory ? H*0.55 : H*0.51}}>
+        <div className="event" style={{fontSize: evSize, padding: `0 ${padX}px`}}>« {data.eventName} »</div>
+      </div>
+
+      {/* Info block */}
+      <div className="content" style={{top: isStory ? H*0.72 : H*0.66, padding: `0 ${padX}px`}}>
+        <div className="info-block" style={{flexWrap: isStory?'wrap':'nowrap'}}>
+          <div className="info">
+            <div className="lbl" style={{fontSize: W*0.017}}>Fecha</div>
+            <div className="val" style={{fontSize: W*0.030}}>{data.date1}</div>
+          </div>
+          <div className="info">
+            <div className="lbl" style={{fontSize: W*0.017}}>Hora</div>
+            <div className="val" style={{fontSize: W*0.030}}>{data.time1}</div>
+          </div>
+          <div className="info">
+            <div className="lbl" style={{fontSize: W*0.017}}>Lugar</div>
+            <div className="val" style={{fontSize: W*0.030}}>{data.venue1}</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Bottom: address + ticket */}
+      <div className="content" style={{bottom: H*0.06}}>
+        <div style={{
+          fontFamily:"'Inter',sans-serif", color:'#e8c79a', fontSize: W*0.024,
+          marginBottom: 10, padding: `0 ${padX}px`
+        }}>{data.address1}</div>
+        <div style={{
+          fontFamily:"'Orbitron',sans-serif", fontWeight:700,
+          color:'#f6e7c8', fontSize: W*0.024,
+          letterSpacing:'.18em', textTransform:'uppercase'
+        }}>{data.ticket1}</div>
+      </div>
+    </div>
+  );
+}
+
+/* ─────────── TEMPLATE 2 — Multi-date tour (clean & minimal) ─────────── */
+function Template2({ data, size }){
+  const W = size.w, H = size.h;
+  const isStory = H > W;
+  const padX = W * 0.09;
+  const titleSize = isStory ? 130 : (W >= 1200 ? 110 : 100);
+
+  return (
+    <div className="f2" style={{position:'absolute', inset:0}}>
+      {/* Subtle corner sunburst as accent */}
+      <div style={{
+        position:'absolute', right:`-${W*0.4}px`, top:`-${W*0.4}px`,
+        width:W*0.8, height:W*0.8, opacity:.18, pointerEvents:'none'
+      }}>
+        <BigSunburst/>
+      </div>
+
+      <div className="header" style={{top: H*0.08, gap: 12}}>
+        <BrandLogo width={W*0.22} monoStroke="#05010f"/>
+        <div className="topline" style={{fontSize: W*0.016, marginTop: 18}}>{data.tourSub}</div>
+        <div className="tour-title" style={{fontSize: titleSize, marginTop: 10}}>{data.tourTitle}</div>
+      </div>
+
+      <div className="dates" style={{
+        top: isStory ? H*0.36 : H*0.32,
+        bottom: H*0.20,
+        padding: `0 ${padX}px`,
+        justifyContent:'space-around'
+      }}>
+        {data.dates.map((d,i)=>(
+          <div key={i} className="date-row">
+            <div className="d-day" style={{fontSize: isStory ? W*0.07 : W*0.058}}>{d.day}</div>
+            <div className="d-mid">
+              <div className="d-venue" style={{fontSize: W*0.030}}>{d.venue}</div>
+              <div className="d-addr" style={{fontSize: W*0.021}}>{d.addr}</div>
+            </div>
+            <div className="d-time" style={{fontSize: W*0.028}}>{d.time}</div>
+          </div>
+        ))}
+      </div>
+
+      <div className="footer" style={{bottom: H*0.06, gap: 14}}>
+        <div className="footer-cta" style={{
+          fontSize: W*0.019,
+          padding: `${W*0.014}px ${W*0.025}px`
+        }}>{data.tourCta}</div>
+        <div style={{
+          fontFamily:"'Orbitron',sans-serif", fontWeight:500,
+          fontSize: W*0.016, letterSpacing:'.24em', textTransform:'uppercase',
+          color:'#6a548c', marginTop: 6
+        }}>artificiosbanda · Buenos Aires</div>
+      </div>
+    </div>
+  );
+}
+
+/* ─────────── TEMPLATE 3 — Art Deco Invitation ─────────── */
+function Template3({ data, size }){
+  const W = size.w, H = size.h;
+  const isStory = H > W;
+  const padX = W * 0.09;
+
+  // Split hostLine into two names + ampersand if it contains " & " or " y "
+  const m = (data.hostLine || '').match(/^(.+?)\s*[&y]\s*(.+)$/i);
+  const nameA = m ? m[1] : data.hostLine;
+  const nameB = m ? m[2] : '';
+
+  // Try to split pDate "Viernes 22 · Agosto · 2026" → weekday / day / month+year
+  const dparts = (data.pDate || '').split(/\s*[·\/\-]\s*/);
+  const weekday = (dparts[0] || '').replace(/\d+/g, '').trim();
+  const dayNum = ((dparts[0] || '').match(/\d+/) || [''])[0];
+  const monthYear = dparts.slice(1).join(' · ');
+
+  // Deco corner ornament (geometric chevrons + dot)
+  const Corner = ({ rot, x, y }) => (
+    <div className="corner" style={{
+      left: x === 'l' ? padX * 0.55 : 'auto',
+      right: x === 'r' ? padX * 0.55 : 'auto',
+      top: y === 't' ? padX * 0.55 : 'auto',
+      bottom: y === 'b' ? padX * 0.55 : 'auto',
+      transform: `rotate(${rot}deg)`
+    }}>
+      <svg viewBox="0 0 64 64">
+        <g fill="none" stroke="#c9a35e" strokeWidth="1.4">
+          <path d="M 0 0 L 64 0 L 64 6 L 6 6 L 6 64 L 0 64 Z" fill="#c9a35e" stroke="none"/>
+          <path d="M 14 14 L 50 14"/>
+          <path d="M 14 14 L 14 50"/>
+          <path d="M 22 22 L 38 22"/>
+          <path d="M 22 22 L 22 38"/>
+        </g>
+        <circle cx="14" cy="14" r="2.4" fill="#c9a35e"/>
+        <circle cx="30" cy="30" r="1.6" fill="#e6c98a"/>
+      </svg>
+    </div>
+  );
+
+  return (
+    <div className="f3" style={{position:'absolute', inset:0}}>
+      {/* Symmetrical deco double-frame */}
+      <div className="frame-double" style={{
+        left: padX * 0.5, top: padX * 0.5, right: padX * 0.5, bottom: padX * 0.5
+      }}></div>
+      {/* Inner hairline frame */}
+      <div className="frame-inner" style={{
+        left: padX, top: padX, right: padX, bottom: padX,
+        borderColor: 'rgba(201,163,94,.35)'
+      }}></div>
+      {/* Corner ornaments */}
+      <Corner x="l" y="t" rot={0}/>
+      <Corner x="r" y="t" rot={90}/>
+      <Corner x="r" y="b" rot={180}/>
+      <Corner x="l" y="b" rot={270}/>
+
+      {/* Eyebrow */}
+      <div className="content" style={{top: H * 0.11}}>
+        <div className="invite-eyebrow" style={{fontSize: W*0.014}}>
+          ~ Te invitamos a celebrar ~
+        </div>
+      </div>
+
+      {/* Host names */}
+      <div className="content" style={{top: isStory ? H*0.17 : H*0.18, padding:`0 ${padX*1.4}px`}}>
+        <div className="host" style={{fontSize: isStory ? W*0.085 : W*0.07, whiteSpace: nameB ? 'normal' : 'nowrap'}}>
+          {nameB ? (
+            <>
+              <span>{nameA}</span>
+              <span className="ampersand" style={{fontSize: isStory ? W*0.10 : W*0.085}}>&</span>
+              <span>{nameB}</span>
+            </>
+          ) : nameA}
+        </div>
+        <div className="occasion" style={{fontSize: W*0.024, marginTop: 16}}>
+          {data.occasion}
+        </div>
+      </div>
+
+      {/* Deco divider */}
+      <div className="content" style={{
+        top: isStory ? H*0.41 : H*0.40,
+        padding: `0 ${padX*1.6}px`
+      }}>
+        <div className="deco-divider">
+          <div className="line"></div>
+          <div className="diamond"></div>
+          <div className="line"></div>
+        </div>
+      </div>
+
+      {/* Date stack */}
+      <div className="content" style={{top: isStory ? H*0.45 : H*0.44}}>
+        <div className="date-stack">
+          <div className="weekday" style={{fontSize: W*0.016}}>{weekday}</div>
+          <div className="day" style={{fontSize: isStory ? W*0.16 : W*0.13}}>{dayNum}</div>
+          <div className="month" style={{fontSize: W*0.016}}>{monthYear}</div>
+        </div>
+      </div>
+
+      {/* Mini divider */}
+      <div className="content" style={{
+        top: isStory ? H*0.66 : H*0.65,
+        padding: `0 ${padX*1.8}px`
+      }}>
+        <div className="deco-divider">
+          <div className="line"></div>
+          <div className="diamond"></div>
+          <div className="line"></div>
+        </div>
+      </div>
+
+      {/* Time + Venue */}
+      <div className="content" style={{top: isStory ? H*0.69 : H*0.68}}>
+        <div style={{display:'flex', justifyContent:'center', gap: '12%'}}>
+          <div className="info">
+            <div className="lbl" style={{fontSize: W*0.015}}>Hora</div>
+            <div className="val" style={{fontSize: W*0.030}}>{data.pTime}</div>
+          </div>
+          <div className="info">
+            <div className="lbl" style={{fontSize: W*0.015}}>Lugar</div>
+            <div className="val" style={{fontSize: W*0.030}}>{data.pVenue}</div>
+            <div className="sub" style={{fontSize: W*0.018}}>{data.pAddr}</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Closer + band */}
+      <div className="content" style={{bottom: H * 0.10}}>
+        <div className="closer" style={{fontSize: W*0.016, marginBottom: 16}}>{data.pCloser}</div>
+        <div style={{display:'flex', justifyContent:'center', marginBottom: 6}}>
+          <BrandLogo width={W*0.18} monoStroke="#0e1a33"/>
+        </div>
+        <div className="with" style={{fontSize: W*0.016}}>con la música en vivo de Artificios</div>
+      </div>
+    </div>
+  );
+}
+
+/* ─────────── TEMPLATE 4 — Photo Hero ─────────── */
+function Template4({ data, size }){
+  const W = size.w, H = size.h;
+  const isStory = H > W;
+  const padX = W * 0.08;
+  return (
+    <div className="f4" style={{position:'absolute', inset:0}}>
+      <div className="photo" style={{backgroundImage:`url(${data.hPhoto})`}}></div>
+      <div className="gradient-edge"></div>
+
+      {/* Top: badge eyebrow + big neon wordmark — pinned high so the photo shows through the middle */}
+      <div style={{
+        position:'absolute', left:0, right:0,
+        top: H*0.06,
+        textAlign:'center', zIndex: 3
+      }}>
+        <div className="badge" style={{fontSize: W*0.016, marginBottom: H*0.018}}>{data.hBadge}</div>
+        <div style={{position:'relative', display:'inline-block'}}>
+          <NeonHalo color="#ff2a8a" color2="#ff6ec7" extend="35%"/>
+          <div className="neon" style={{
+            position:'relative', zIndex:1,
+            top:'auto', left:'auto', right:'auto',
+            fontSize: W*0.125, padding:`0 ${padX}px`, whiteSpace:'nowrap'
+          }}>Artificios</div>
+        </div>
+      </div>
+
+      <div className="event-name" style={{top: isStory? H*0.46 : H*0.52, fontSize: isStory? W*0.085 : W*0.075, padding:`0 ${padX}px`}}>{data.hHeadline}</div>
+
+      <div className="info-strip" style={{top: isStory? H*0.62 : H*0.66}}>
+        <div className="cell">
+          <div className="lbl" style={{fontSize: W*0.015}}>Fecha</div>
+          <div className="val" style={{fontSize: W*0.028}}>{data.hDate}</div>
+        </div>
+        <div className="cell">
+          <div className="lbl" style={{fontSize: W*0.015}}>Hora</div>
+          <div className="val" style={{fontSize: W*0.028}}>{data.hTime}</div>
+        </div>
+        <div className="cell">
+          <div className="lbl" style={{fontSize: W*0.015}}>Lugar</div>
+          <div className="val" style={{fontSize: W*0.028}}>{data.hVenue}</div>
+        </div>
+      </div>
+
+      <div className="footer" style={{bottom: H*0.06, fontSize: W*0.021, padding:`0 ${padX}px`}}>{data.hFooter}</div>
+    </div>
+  );
+}
+
+/* ─────────── TEMPLATE 4B — Editorial Cover (photo hero alt) ─────────── */
+function Template4B({ data, size }){
+  const W = size.w, H = size.h;
+  const isStory = H > W;
+  const padX = W * 0.07;
+
+  // Photo occupies top ~58% (post/A4) or ~62% (story); type block fills remainder.
+  const photoH = isStory ? H * 0.62 : H * 0.58;
+  // Big masthead "ARTIFICIOS" fontSize fits in (W - 2*padX), Orbitron 900 ~6.66× fontSize wide.
+  const mastSize = W * 0.115;
+
+  // Feature line is assembled from editable signs so any of them can be
+  // changed or removed; empty signs are dropped and spacing stays clean.
+  const featureLine = [
+    data.hQuoteOpen, data.hCoverTitle, data.hQuoteClose, data.hSep, data.hFeature
+  ].filter(s => s && String(s).trim() !== '').join(' ');
+
+  return (
+    <div className="f4b" style={{position:'absolute', inset:0}}>
+      {/* Photo top half */}
+      <div className="photo" style={{
+        backgroundImage:`url(${data.hPhoto})`,
+        height: photoH
+      }}></div>
+
+      {/* Right-edge color bar (over photo) */}
+      <div className="pink-bar" style={{
+        width: W * 0.012,
+        height: photoH,
+        opacity:.85
+      }}></div>
+
+      {/* Masthead top: VOL + ISSUE */}
+      <div className="masthead" style={{padding: `${H*0.045}px ${padX}px 0`}}>
+        <div className="vol" style={{fontSize: W*0.014}}>{data.hVol}</div>
+        <div className="issue" style={{fontSize: W*0.014}}>{data.hSeason}</div>
+      </div>
+
+      {/* Type block (bottom) */}
+      <div className="typeblock" style={{height: H - photoH}}>
+        {/* Big masthead title spanning into photo edge */}
+        <div style={{
+          padding: `${W*0.022}px ${padX}px ${W*0.012}px`,
+          display:'flex', flexDirection:'column', gap: W*0.008
+        }}>
+          <div className="kicker" style={{fontSize: W*0.014}}>Tributo 80's · En vivo</div>
+          <div className="masthead-title" style={{fontSize: mastSize}}>ARTIFICIOS</div>
+          <div className="feature" style={{fontSize: W*0.020, marginTop: W*0.004}}>
+            {featureLine}
+          </div>
+        </div>
+
+        <div className="meta-grid">
+          <div className="meta-cell">
+            <div className="lbl" style={{fontSize: W*0.014}}>Fecha</div>
+            <div className="val" style={{fontSize: W*0.026}}>{data.hDate}</div>
+          </div>
+          <div className="meta-cell">
+            <div className="lbl" style={{fontSize: W*0.014}}>Hora</div>
+            <div className="val" style={{fontSize: W*0.026}}>{data.hTime}</div>
+          </div>
+          <div className="meta-cell">
+            <div className="lbl" style={{fontSize: W*0.014}}>Lugar</div>
+            <div className="val" style={{fontSize: W*0.026}}>{data.hVenue}</div>
+          </div>
+        </div>
+
+        <div className="footer" style={{
+          padding: `${W*0.012}px ${padX}px`,
+          fontSize: W*0.017,
+          marginTop: 'auto'
+        }}>
+          <span>{data.hFooter}</span>
+          <BrandLogo width={W*0.12} monoStroke="#0a0a14"/>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ─────────── TEMPLATE 5 — Contact Sheet (photographic) ─────────── */
+function Template5({ data, size }){
+  const W = size.w, H = size.h;
+  const isStory = H > W;
+  const padX = W * 0.06;
+
+  // Sheet placement: photos in 2x2 grid filling middle band.
+  // Raised higher + shorter so the paste-up info label has room to breathe.
+  const sheetTop = isStory ? H * 0.30 : H * 0.33;
+  const sheetBottom = isStory ? H * 0.30 : H * 0.30;
+  const sheetH = H - sheetTop - sheetBottom;
+  const sheetW = W - padX * 2;
+  const cellW = (sheetW - 4) / 2;  // 4px gutter
+  const cellH = (sheetH - 4) / 2;
+
+  const frames = (data.cPhotos || []).slice(0, 4);
+  // Pad to 4 frames if data short
+  while (frames.length < 4) frames.push(frames[frames.length - 1] || '');
+
+  const selectIdx = 0; // singer (top-left) gets the grease-pencil ring
+  const today = new Date();
+  const rollNo = '04 / 26';
+
+  return (
+    <div className="f5 grain" style={{position:'absolute', inset:0}}>
+      {/* Top header: brand + roll info */}
+      <div className="header-row" style={{top: H*0.05, padding: `0 ${padX}px`, fontSize: W*0.012}}>
+        <div style={{display:'flex', alignItems:'center', gap: 14}}>
+          <BrandLogo width={W*0.16} monoStroke="#0d0a08"/>
+        </div>
+        <div style={{textAlign:'right'}}>
+          <div>Contact Sheet · Roll {rollNo}</div>
+          <div style={{color:'#d6443c', marginTop:4}}>★ Frame #{String(selectIdx+1).padStart(2,'0')} — selected</div>
+        </div>
+      </div>
+
+      {/* Title */}
+      <div className="title" style={{
+        top: isStory ? H * 0.13 : H * 0.16,
+        padding: `0 ${padX}px`,
+      }}>
+        <div className="subtitle" style={{fontSize: W*0.016, marginBottom: 8}}>{data.cSub}</div>
+        <div style={{fontSize: isStory ? W * 0.105 : W * 0.092, lineHeight: 0.92}}>{data.cTitle}</div>
+        <div style={{
+          fontFamily:"'Inter',sans-serif", fontWeight:300, fontStyle:'italic',
+          color:'#a09584', fontSize: W*0.018, marginTop: 8, letterSpacing:'.02em'
+        }}>
+          — cuatro músicos, una década, un solo show.
+        </div>
+      </div>
+
+      {/* Contact sheet 2x2 grid */}
+      <div className="sheet" style={{
+        left: padX, right: padX,
+        top: sheetTop, height: sheetH,
+        gap: 4
+      }}>
+        {frames.map((src, i) => (
+          <div className="frame" key={i}>
+            <div className="ph" style={{backgroundImage: `url(${src})`}}></div>
+            <div className="strip" style={{
+              padding: `${W*0.006}px ${W*0.012}px`,
+              fontSize: W*0.010
+            }}>
+              <span className="num">— {String(i+1).padStart(2,'0')} —</span>
+              <span>KODAK TX 400</span>
+              <span>ƒ/2.8 · 1/60</span>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Red china-marker ring removed per request */}
+
+      {/* Sprocket holes along right edge of sheet (decorative) */}
+      <div className="sprockets" style={{
+        position:'absolute',
+        left: padX, right: padX,
+        top: sheetTop + sheetH + 4, height: W*0.02,
+        padding: `0 ${W*0.01}px`
+      }}>
+        {Array.from({length: 14}).map((_, i) => (
+          <span key={i} style={{
+            width: W*0.025, height: W*0.011
+          }}></span>
+        ))}
+      </div>
+
+      {/* Paste-up info label, bottom-right */}
+      <div className="label-card" style={{
+        right: padX,
+        bottom: H * 0.04,
+        width: isStory ? W * 0.66 : W * 0.58,
+        fontSize: W*0.022
+      }}>
+        <div className="row">
+          <div className="lbl">Fecha</div>
+          <div className="val">{data.cDate}</div>
+        </div>
+        <div className="row">
+          <div className="lbl">Hora</div>
+          <div className="val">{data.cTime}</div>
+        </div>
+        <div className="row">
+          <div className="lbl">Lugar</div>
+          <div className="val">{data.cVenue}</div>
+        </div>
+        <div className="row">
+          <div className="lbl">Dir.</div>
+          <div className="val" style={{fontWeight:500, fontSize: W*0.018}}>{data.cAddr}</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ─────────── TEMPLATE 6 — Cinema Marquee ─────────── */
+function Template6({ data, size }){
+  const W = size.w, H = size.h;
+  const isStory = H > W;
+  const padX = W * 0.07;
+  const frameInset = padX * 0.5;
+
+  // Marquee bulbs around the frame
+  const bulbs = [];
+  const bulbR = Math.max(6, W*0.008);
+  const cols = Math.floor((W - frameInset*2) / (bulbR*4));
+  const rows = Math.floor((H - frameInset*2) / (bulbR*4));
+  for(let i=0; i<cols; i++){
+    const x = frameInset + (i+0.5) * ((W - frameInset*2) / cols);
+    bulbs.push({x, y: frameInset, k:`t${i}`});
+    bulbs.push({x, y: H - frameInset, k:`b${i}`});
+  }
+  for(let i=1; i<rows-1; i++){
+    const y = frameInset + (i+0.5) * ((H - frameInset*2) / rows);
+    bulbs.push({x: frameInset, y, k:`l${i}`});
+    bulbs.push({x: W - frameInset, y, k:`r${i}`});
+  }
+
+  return (
+    <div className="f6" style={{position:'absolute', inset:0}}>
+      <div className="photo" style={{backgroundImage:`url(${data.mPhoto})`}}></div>
+      <div className="marquee-frame" style={{
+        left: frameInset, top: frameInset, right: frameInset, bottom: frameInset
+      }}></div>
+
+      <div className="bulbs">
+        {bulbs.map(b => (
+          <div key={b.k} className="bulb" style={{
+            left: b.x - bulbR, top: b.y - bulbR,
+            width: bulbR*2, height: bulbR*2
+          }}></div>
+        ))}
+      </div>
+
+      <div className="topline" style={{top: H*0.12, fontSize: W*0.018}}>
+        {data.mTopline}
+      </div>
+      <div className="presents" style={{top: H*0.18, fontSize: W*0.020}}>{data.mPresents}</div>
+
+      <div style={{
+        position:'absolute', left:0, right:0,
+        top: isStory? H*0.30 : H*0.30,
+        textAlign:'center', zIndex: 3
+      }}>
+        <div style={{position:'relative', display:'inline-block'}}>
+          <NeonHalo color="#ff2a8a" color2="#ff6ec7" extend="35%"/>
+          <div className="billing" style={{
+            position:'relative', zIndex:1,
+            top:'auto', left:'auto', right:'auto',
+            fontSize: W*0.125, padding:`0 ${padX}px`, whiteSpace:'nowrap'
+          }}>Artificios</div>
+        </div>
+      </div>
+
+      <div className="feature" style={{top: isStory? H*0.52 : H*0.54, fontSize: W*0.034, padding:`0 ${padX}px`}}>{data.mFeature}</div>
+
+      <div style={{
+        position:'absolute', left:0, right:0, top: isStory? H*0.62 : H*0.64,
+        textAlign:'center', zIndex:3,
+        fontFamily:"'Orbitron',sans-serif", fontWeight:700,
+        color:'#fff', letterSpacing:'.08em', fontSize: W*0.034
+      }}>{data.mDate}</div>
+      <div style={{
+        position:'absolute', left:0, right:0, top: isStory? H*0.69 : H*0.71,
+        textAlign:'center', zIndex:3,
+        fontFamily:"'Inter',sans-serif", color:'#cbb9e7', fontSize: W*0.026
+      }}>{data.mVenue}</div>
+
+      <div className="ticket" style={{
+        bottom: H*0.13, fontSize: W*0.021
+      }}>{data.mTicket}</div>
+
+      <div className="credits" style={{bottom: H*0.05, fontSize: W*0.015, padding:`0 ${padX}px`}}>
+        {data.mCredits}
+      </div>
+    </div>
+  );
+}
+
+/* ─────────── App ─────────── */
+const STORAGE_KEY = 'artificios.flyers.data.v1';
+
+function loadSaved(){
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch { return null; }
+}
+
+function App(){
+  const [data, setData] = useState(() => {
+    const saved = loadSaved();
+    return saved ? { ...DEFAULTS, ...saved } : DEFAULTS;
+  });
+  const set = (k) => (v) => setData(d => ({...d, [k]: v}));
+
+  // Persist every edit to localStorage so they survive reload.
+  useEffect(() => {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch {}
+  }, [data]);
+
+  const reset = () => {
+    if (!confirm('Reset every field back to the default text? This will erase your edits.')) return;
+    try { localStorage.removeItem(STORAGE_KEY); } catch {}
+    setData(DEFAULTS);
+  };
+
+  const renderTpl = (Tpl) => (size) => <Tpl data={data} size={size}/>;
+
+  return (
+    <>
+      <div style={{
+        display:'flex', justifyContent:'flex-end', gap:10,
+        margin:'0 0 18px'
+      }}>
+        <button onClick={reset} className="dl-btn" style={{
+          background: 'transparent',
+          border: '1px solid rgba(255,42,138,.5)',
+          color: '#ff6ec7'
+        }}>Reset to defaults</button>
+      </div>
+      <div className="template-block">
+        <div className="template-head">
+          <span className="num">01</span>
+          <h2>Single Gig — Full Neon</h2>
+          <span className="desc">Big neon Artificios · sun · grid horizon · event detail block</span>
+        </div>
+        <div className="tweaks">
+          <div className="tweaks-title">Single-gig fields <span className="scope">· shared with 01 · B</span></div>
+          <Field label="Event name" value={data.eventName} onChange={set('eventName')}/>
+          <Field label="Date" value={data.date1} onChange={set('date1')}/>
+          <Field label="Time" value={data.time1} onChange={set('time1')}/>
+          <Field label="Venue" value={data.venue1} onChange={set('venue1')}/>
+          <Field label="Address" value={data.address1} onChange={set('address1')} wide/>
+          <Field label="Ticket info" value={data.ticket1} onChange={set('ticket1')} wide/>
+          <Field label="Texto bajo el logo" value={data.topline} onChange={set('topline')} wide/>
+          <ColorField label="Color del texto" value={data.toplineColor} onChange={set('toplineColor')}/>
+          <Check label="Mostrar logo" checked={data.showLogo} onChange={set('showLogo')}/>
+          <Check label="Mostrar título ARTIFICIOS" checked={data.showTitle} onChange={set('showTitle')}/>
+        </div>
+        <div className="size-row">
+          <FlyerSlot size={SIZES.igPost}  name="single-igpost"  render={renderTpl(Template1)}/>
+          <FlyerSlot size={SIZES.igStory} name="single-igstory" render={renderTpl(Template1)}/>
+          <FlyerSlot size={SIZES.a4}      name="single-a4"      render={renderTpl(Template1)}/>
+        </div>
+      </div>
+
+      <div className="template-block">
+        <div className="template-head">
+          <span className="num">01 · B</span>
+          <h2>Single Gig — Warm Dusk (alt)</h2>
+          <span className="desc">Same composition · filmic warm palette · no fluorescent glow · Orbitron title with hairline rule</span>
+        </div>
+        <div className="tweaks">
+          <div className="tweaks-title">Single-gig fields <span className="scope">· same as 01 above</span></div>
+          <Field label="Event name" value={data.eventName} onChange={set('eventName')}/>
+          <Field label="Date" value={data.date1} onChange={set('date1')}/>
+          <Field label="Time" value={data.time1} onChange={set('time1')}/>
+          <Field label="Venue" value={data.venue1} onChange={set('venue1')}/>
+          <Field label="Address" value={data.address1} onChange={set('address1')} wide/>
+          <Field label="Ticket info" value={data.ticket1} onChange={set('ticket1')} wide/>
+          <Field label="Texto bajo el logo" value={data.topline} onChange={set('topline')} wide/>
+          <ColorField label="Color del texto" value={data.toplineColorB} onChange={set('toplineColorB')}/>
+          <Check label="Mostrar logo" checked={data.showLogo} onChange={set('showLogo')}/>
+          <Check label="Mostrar título ARTIFICIOS" checked={data.showTitle} onChange={set('showTitle')}/>
+        </div>
+        <div className="size-row">
+          <FlyerSlot size={SIZES.igPost}  name="single-dusk-igpost"  render={renderTpl(Template1B)}/>
+          <FlyerSlot size={SIZES.igStory} name="single-dusk-igstory" render={renderTpl(Template1B)}/>
+          <FlyerSlot size={SIZES.a4}      name="single-dusk-a4"      render={renderTpl(Template1B)}/>
+        </div>
+      </div>
+
+      <div className="template-block">
+        <div className="template-head">
+          <span className="num">01 · C</span>
+          <h2>Single Gig — Laser Lime (alt)</h2>
+          <span className="desc">Same composition · electric-blue neon title · acid-lime accents · teal horizon</span>
+        </div>
+        <div className="tweaks">
+          <div className="tweaks-title">Single-gig fields <span className="scope">· same as 01 above</span></div>
+          <Field label="Event name" value={data.eventName} onChange={set('eventName')}/>
+          <Field label="Date" value={data.date1} onChange={set('date1')}/>
+          <Field label="Time" value={data.time1} onChange={set('time1')}/>
+          <Field label="Venue" value={data.venue1} onChange={set('venue1')}/>
+          <Field label="Address" value={data.address1} onChange={set('address1')} wide/>
+          <Field label="Ticket info" value={data.ticket1} onChange={set('ticket1')} wide/>
+          <Field label="Texto bajo el logo" value={data.topline} onChange={set('topline')} wide/>
+          <ColorField label="Color del texto" value={data.toplineColorC} onChange={set('toplineColorC')}/>
+          <Check label="Mostrar logo" checked={data.showLogo} onChange={set('showLogo')}/>
+          <Check label="Mostrar título ARTIFICIOS" checked={data.showTitle} onChange={set('showTitle')}/>
+        </div>
+        <div className="size-row">
+          <FlyerSlot size={SIZES.igPost}  name="single-lime-igpost"  render={renderTpl(Template1C)}/>
+          <FlyerSlot size={SIZES.igStory} name="single-lime-igstory" render={renderTpl(Template1C)}/>
+          <FlyerSlot size={SIZES.a4}      name="single-lime-a4"      render={renderTpl(Template1C)}/>
+        </div>
+      </div>
+
+      <div className="template-block">
+        <div className="template-head">
+          <span className="num">01 · D</span>
+          <h2>Single Gig — Vaporwave Pastel (alt)</h2>
+          <span className="desc">Same composition · soft magenta/lilac neon · aqua accents · peach-pink twilight</span>
+        </div>
+        <div className="tweaks">
+          <div className="tweaks-title">Single-gig fields <span className="scope">· same as 01 above</span></div>
+          <Field label="Event name" value={data.eventName} onChange={set('eventName')}/>
+          <Field label="Date" value={data.date1} onChange={set('date1')}/>
+          <Field label="Time" value={data.time1} onChange={set('time1')}/>
+          <Field label="Venue" value={data.venue1} onChange={set('venue1')}/>
+          <Field label="Address" value={data.address1} onChange={set('address1')} wide/>
+          <Field label="Ticket info" value={data.ticket1} onChange={set('ticket1')} wide/>
+          <Field label="Texto bajo el logo" value={data.topline} onChange={set('topline')} wide/>
+          <ColorField label="Color del texto" value={data.toplineColorD} onChange={set('toplineColorD')}/>
+          <Check label="Mostrar logo" checked={data.showLogo} onChange={set('showLogo')}/>
+          <Check label="Mostrar título ARTIFICIOS" checked={data.showTitle} onChange={set('showTitle')}/>
+        </div>
+        <div className="size-row">
+          <FlyerSlot size={SIZES.igPost}  name="single-vapor-igpost"  render={renderTpl(Template1D)}/>
+          <FlyerSlot size={SIZES.igStory} name="single-vapor-igstory" render={renderTpl(Template1D)}/>
+          <FlyerSlot size={SIZES.a4}      name="single-vapor-a4"      render={renderTpl(Template1D)}/>
+        </div>
+      </div>
+
+      <div className="template-block">
+        <div className="template-head">
+          <span className="num">02</span>
+          <h2>Multi-Date Tour — Clean & Minimal</h2>
+          <span className="desc">Restrained black · tour title · stacked date rows · subtle sunburst accent</span>
+        </div>
+        <div className="tweaks">
+          <div className="tweaks-title">Tour fields</div>
+          <Field label="Tour title" value={data.tourTitle} onChange={set('tourTitle')}/>
+          <Field label="Tour subtitle" value={data.tourSub} onChange={set('tourSub')} wide/>
+          <Field label="CTA / contact" value={data.tourCta} onChange={set('tourCta')}/>
+          <div className="t full">
+            <label>Tour dates · one per line · day | venue | address | time</label>
+            <textarea
+              value={data.dates.map(d=>`${d.day} | ${d.venue} | ${d.addr} | ${d.time}`).join('\n')}
+              onChange={e => {
+                const dates = e.target.value.split('\n').filter(Boolean).map(line => {
+                  const [day,venue,addr,time] = line.split('|').map(s=>(s||'').trim());
+                  return { day, venue, addr, time };
+                });
+                setData(d=>({...d, dates}));
+              }}
+              style={{minHeight: 110}}
+            />
+          </div>
+        </div>
+        <div className="size-row">
+          <FlyerSlot size={SIZES.igPost}  name="tour-igpost"  render={renderTpl(Template2)}/>
+          <FlyerSlot size={SIZES.igStory} name="tour-igstory" render={renderTpl(Template2)}/>
+          <FlyerSlot size={SIZES.a4}      name="tour-a4"      render={renderTpl(Template2)}/>
+        </div>
+      </div>
+
+      <div className="template-block">
+        <div className="template-head">
+          <span className="num">03</span>
+          <h2>Private Event — Art Deco Invitation</h2>
+          <span className="desc">Deep navy · gold deco frame & corner ornaments · big day number · symmetrical wedding-invite layout</span>
+        </div>
+        <div className="tweaks">
+          <div className="tweaks-title">Private-event fields</div>
+          <Field label="Host(s)" value={data.hostLine} onChange={set('hostLine')}/>
+          <Field label="Occasion" value={data.occasion} onChange={set('occasion')}/>
+          <Field label="Date" value={data.pDate} onChange={set('pDate')}/>
+          <Field label="Time" value={data.pTime} onChange={set('pTime')}/>
+          <Field label="Venue" value={data.pVenue} onChange={set('pVenue')}/>
+          <Field label="Address" value={data.pAddr} onChange={set('pAddr')} wide/>
+          <Field label="Closer line" value={data.pCloser} onChange={set('pCloser')}/>
+        </div>
+        <div className="size-row">
+          <FlyerSlot size={SIZES.igPost}  name="private-igpost"  render={renderTpl(Template3)}/>
+          <FlyerSlot size={SIZES.igStory} name="private-igstory" render={renderTpl(Template3)}/>
+          <FlyerSlot size={SIZES.a4}      name="private-a4"      render={renderTpl(Template3)}/>
+        </div>
+      </div>
+
+      <div className="template-block">
+        <div className="template-head">
+          <span className="num">04</span>
+          <h2>Photo Hero — Live Action</h2>
+          <span className="desc">Full-bleed band photo · neon overlay · info strip</span>
+        </div>
+        <div className="tweaks">
+          <div className="tweaks-title">Photo-hero fields <span className="scope">· shared with 04 · B</span></div>
+          <Field label="Image path" value={data.hPhoto} onChange={set('hPhoto')} wide/>
+          <Field label="Badge" value={data.hBadge} onChange={set('hBadge')}/>
+          <Field label="Headline" value={data.hHeadline} onChange={set('hHeadline')}/>
+          <Field label="Date" value={data.hDate} onChange={set('hDate')}/>
+          <Field label="Time" value={data.hTime} onChange={set('hTime')}/>
+          <Field label="Venue" value={data.hVenue} onChange={set('hVenue')}/>
+          <Field label="Footer" value={data.hFooter} onChange={set('hFooter')} wide/>
+        </div>
+        <div className="size-row">
+          <FlyerSlot size={SIZES.igPost}  name="hero-igpost"  render={renderTpl(Template4)}/>
+          <FlyerSlot size={SIZES.igStory} name="hero-igstory" render={renderTpl(Template4)}/>
+          <FlyerSlot size={SIZES.a4}      name="hero-a4"      render={renderTpl(Template4)}/>
+        </div>
+      </div>
+
+      <div className="template-block">
+        <div className="template-head">
+          <span className="num">04 · B</span>
+          <h2>Photo Hero — Editorial Cover (alt)</h2>
+          <span className="desc">Magazine-cover energy · photo top · solid type block · masthead Orbitron · accent bar · no neon glow</span>
+        </div>
+        <div className="tweaks">
+          <div className="tweaks-title">Editorial-cover fields <span className="scope">· photo shared with 04</span></div>
+          <Field label="Image path" value={data.hPhoto} onChange={set('hPhoto')} wide/>
+          <Field label="Date" value={data.hDate} onChange={set('hDate')}/>
+          <Field label="Time" value={data.hTime} onChange={set('hTime')}/>
+          <Field label="Venue" value={data.hVenue} onChange={set('hVenue')}/>
+          <Field label="Footer" value={data.hFooter} onChange={set('hFooter')} wide/>
+          <Field label="Texto bajo ARTIFICIOS" value={data.hFeature} onChange={set('hFeature')} wide/>
+          <Field label="Signo apertura" value={data.hQuoteOpen} onChange={set('hQuoteOpen')}/>
+          <Field label="Título entre signos" value={data.hCoverTitle} onChange={set('hCoverTitle')}/>
+          <Field label="Signo cierre" value={data.hQuoteClose} onChange={set('hQuoteClose')}/>
+          <Field label="Separador" value={data.hSep} onChange={set('hSep')}/>
+          <Field label="Volumen (arriba izq.)" value={data.hVol} onChange={set('hVol')}/>
+          <Field label="Temporada (arriba der.)" value={data.hSeason} onChange={set('hSeason')}/>
+        </div>
+        <div className="size-row">
+          <FlyerSlot size={SIZES.igPost}  name="hero-edit-igpost"  render={renderTpl(Template4B)}/>
+          <FlyerSlot size={SIZES.igStory} name="hero-edit-igstory" render={renderTpl(Template4B)}/>
+          <FlyerSlot size={SIZES.a4}      name="hero-edit-a4"      render={renderTpl(Template4B)}/>
+        </div>
+      </div>
+
+      <div className="template-block">
+        <div className="template-head">
+          <span className="num">05</span>
+          <h2>Contact Sheet — Photographic Proof</h2>
+          <span className="desc">Roll of film aesthetic · 2×2 frame grid · red china-marker select · paste-up info label</span>
+        </div>
+        <div className="tweaks">
+          <div className="tweaks-title">Contact-sheet fields</div>
+          <Field label="Title" value={data.cTitle} onChange={set('cTitle')}/>
+          <Field label="Stamp / kicker" value={data.cSub} onChange={set('cSub')}/>
+          <Field label="Date" value={data.cDate} onChange={set('cDate')}/>
+          <Field label="Time" value={data.cTime} onChange={set('cTime')}/>
+          <Field label="Venue" value={data.cVenue} onChange={set('cVenue')}/>
+          <Field label="Address" value={data.cAddr} onChange={set('cAddr')} wide/>
+        </div>
+        <div className="size-row">
+          <FlyerSlot size={SIZES.igPost}  name="collage-igpost"  render={renderTpl(Template5)}/>
+          <FlyerSlot size={SIZES.igStory} name="collage-igstory" render={renderTpl(Template5)}/>
+          <FlyerSlot size={SIZES.a4}      name="collage-a4"      render={renderTpl(Template5)}/>
+        </div>
+      </div>
+
+      <div className="template-block">
+        <div className="template-head">
+          <span className="num">06</span>
+          <h2>Cinema Marquee — Vintage Poster</h2>
+          <span className="desc">Bulb-lit frame · oversized billing · ticket-stub footer</span>
+        </div>
+        <div className="tweaks">
+          <div className="tweaks-title">Cinema-marquee fields</div>
+          <Field label="Image path" value={data.mPhoto} onChange={set('mPhoto')} wide/>
+          <Field label="Top line (★ stars row)" value={data.mTopline} onChange={set('mTopline')} wide/>
+          <Field label="Presents line" value={data.mPresents} onChange={set('mPresents')} wide/>
+          <Field label="Feature" value={data.mFeature} onChange={set('mFeature')} wide/>
+          <Field label="Date" value={data.mDate} onChange={set('mDate')}/>
+          <Field label="Venue" value={data.mVenue} onChange={set('mVenue')}/>
+          <Field label="Ticket line" value={data.mTicket} onChange={set('mTicket')}/>
+          <Field label="Credits (bottom line)" value={data.mCredits} onChange={set('mCredits')} wide/>
+        </div>
+        <div className="size-row">
+          <FlyerSlot size={SIZES.igPost}  name="marquee-igpost"  render={renderTpl(Template6)}/>
+          <FlyerSlot size={SIZES.igStory} name="marquee-igstory" render={renderTpl(Template6)}/>
+          <FlyerSlot size={SIZES.a4}      name="marquee-a4"      render={renderTpl(Template6)}/>
+        </div>
+      </div>
+    </>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+
+</div><!-- /app-wrapper -->
+
+</body>
+</html>
