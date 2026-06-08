@@ -1899,7 +1899,7 @@ function AdminView({ poll, update, songs, songsById, onLogout }){
             type="number" min="1" max="20"
             value={poll.maxVotes}
             onChange={e => update({ maxVotes: Math.max(1, Math.min(20, parseInt(e.target.value)||1)) })}
-            disabled={poll.isOpen || poll.closed}
+            disabled={poll.closed}
           />
         </div>
         <div className="a-meta-stat">
