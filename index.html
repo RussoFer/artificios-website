@@ -707,7 +707,7 @@ section{padding: clamp(80px, 12vw, 140px) clamp(20px, 5vw, 72px); position:relat
   linear-gradient(135deg, #6a2bff, #22e8ff);
 }
 .gallery-video-row{
-  max-width:1400px; margin: 16px auto 0;
+  max-width:1400px; margin: 0 auto 16px;
   display:flex; justify-content:center;
 }
 .ph-video{
@@ -1212,6 +1212,18 @@ footer{
     </div>
     <p class="lead">Momentos de los shows. Lo que pasa en la pista cuando arrancan los primeros acordes.</p>
   </div>
+  <div class="gallery-video-row">
+    <div class="ph ph-video">
+      <iframe
+        src="https://www.youtube.com/embed/959VbKscR90"
+        title="Artificios en vivo"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        allowfullscreen
+        loading="lazy">
+      </iframe>
+      <div class="ph-label"><span>ARTIFICIOS · en vivo</span><span class="tag-sm">VIDEO</span></div>
+    </div>
+  </div>
   <div class="gallery-grid">
     <div class="ph ph-1">
       <img src="assets/photo-marquee.jpg" alt="Artificios en vivo - marquee" loading="lazy" />
@@ -1243,22 +1255,19 @@ footer{
     </div>
   </div>
   </div>
-  <div class="gallery-video-row">
-    <div class="ph ph-video">
-      <iframe
-        src="https://www.youtube.com/embed/959VbKscR90"
-        title="Artificios en vivo"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-        allowfullscreen
-        loading="lazy">
-      </iframe>
-      <div class="ph-label"><span>ARTIFICIOS · en vivo</span><span class="tag-sm">VIDEO</span></div>
-    </div>
-  </div>
 
   <!-- MOBILE CAROUSEL -->
   <div class="gallery-carousel" id="gallery-carousel" aria-label="Galería">
     <div class="gc-track">
+      <div class="gc-slide gc-slide-video">
+        <iframe
+          src="https://www.youtube.com/embed/959VbKscR90"
+          title="Artificios en vivo"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowfullscreen loading="lazy">
+        </iframe>
+        <div class="ph-label"><span>ARTIFICIOS · en vivo</span><span class="tag-sm">VIDEO</span></div>
+      </div>
       <div class="gc-slide">
         <img src="assets/photo-marquee.jpg" alt="Artificios en vivo - marquee" loading="lazy" />
         <div class="ph-label"><span>ARTIFICIOS · en vivo</span><span class="tag-sm">2026</span></div>
@@ -1286,15 +1295,6 @@ footer{
       <div class="gc-slide">
         <img src="assets/photo-lawest-stage.jpg" alt="Artificios - La West show completo" loading="lazy" />
         <div class="ph-label"><span>La West · Show completo</span><span class="tag-sm">2026</span></div>
-      </div>
-      <div class="gc-slide gc-slide-video">
-        <iframe
-          src="https://www.youtube.com/embed/959VbKscR90"
-          title="Artificios en vivo"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-          allowfullscreen loading="lazy">
-        </iframe>
-        <div class="ph-label"><span>ARTIFICIOS · en vivo</span><span class="tag-sm">VIDEO</span></div>
       </div>
     </div>
     <div class="gc-dots" id="gc-dots"></div>
