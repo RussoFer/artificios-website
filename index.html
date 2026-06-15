@@ -703,6 +703,19 @@ section{padding: clamp(80px, 12vw, 140px) clamp(20px, 5vw, 72px); position:relat
 .ph-6{grid-column: span 4; grid-row: span 2; background:
   linear-gradient(135deg, #49126e, #22e8ff);
 }
+.gallery-video-row{
+  max-width:1400px; margin: 16px auto 0;
+  display:flex; justify-content:center;
+}
+.ph-video{
+  width: min(320px, 100%);
+  aspect-ratio: 9/16;
+  background: var(--ink-3);
+  flex-shrink: 0;
+}
+.ph-video iframe{
+  position:absolute; inset:0; width:100%; height:100%; border:0;
+}
 
 /* Fake band silhouette inside photo placeholders */
 .ph-silhouette{
@@ -1182,6 +1195,18 @@ footer{
       <div class="ph-label"><span>Público · Celulares al aire</span><span class="tag-sm">2026</span></div>
     </div>
   </div>
+  </div>
+  <div class="gallery-video-row">
+    <div class="ph ph-video">
+      <iframe
+        src="https://www.youtube.com/embed/959VbKscR90"
+        title="Artificios en vivo"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        allowfullscreen
+        loading="lazy">
+      </iframe>
+      <div class="ph-label"><span>ARTIFICIOS · en vivo</span><span class="tag-sm">VIDEO</span></div>
+    </div>
   </div>
 </section>
 
