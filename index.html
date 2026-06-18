@@ -648,34 +648,6 @@ section{padding: clamp(80px, 12vw, 140px) clamp(20px, 5vw, 72px); position:relat
 
 /* ============ GALLERY ============ */
 .gallery{background: var(--ink); position:relative}
-.gallery-grid{
-  max-width:1400px; margin: 0 auto;
-  display:grid;
-  grid-template-columns: repeat(12, 1fr);
-  grid-auto-rows: 160px;
-  gap: 16px;
-}
-.ph{
-  position:relative; overflow:hidden; border-radius: 14px;
-  border: 1px solid rgba(255,255,255,.08);
-  background: var(--ink-3);
-  transition: transform .3s, border-color .3s;
-}
-.ph img{
-  position:absolute; inset:0;
-  width:100%; height:100%;
-  object-fit: cover;
-  display:block;
-  transition: transform .6s ease;
-}
-.ph:hover img{transform: scale(1.04)}
-.ph:hover{transform: scale(1.02); border-color: var(--pink)}
-.ph::after{
-  content:"";
-  position:absolute; inset:0;
-  background: linear-gradient(180deg, transparent 50%, rgba(5,1,15,.85) 100%);
-  pointer-events:none;
-}
 .ph-label{
   position:absolute; bottom: 14px; left: 16px; right: 16px;
   z-index: 2;
@@ -685,90 +657,61 @@ section{padding: clamp(80px, 12vw, 140px) clamp(20px, 5vw, 72px); position:relat
   color:#fff;
 }
 .ph-label .tag-sm{color:var(--cyan)}
-.ph-1{grid-column: span 7; grid-row: span 3; background:
-  linear-gradient(135deg, #6a2bff, #ff2a8a, #ffd86b);
-}
-.ph-2{grid-column: span 5; grid-row: span 2; background:
-  linear-gradient(135deg, #22e8ff, #6a2bff);
-}
-.ph-3{grid-column: span 5; grid-row: span 1; background:
-  linear-gradient(135deg, #ff2a8a, #49126e);
-}
-.ph-4{grid-column: span 4; grid-row: span 2; background:
-  linear-gradient(135deg, #ffd86b, #ff2a8a);
-}
-.ph-5{grid-column: span 4; grid-row: span 2; background:
-  linear-gradient(135deg, #22e8ff, #ff6ec7);
-}
-.ph-6{grid-column: span 4; grid-row: span 2; background:
-  linear-gradient(135deg, #49126e, #22e8ff);
-}
-.ph-7{grid-column: span 12; grid-row: span 2; background:
-  linear-gradient(135deg, #6a2bff, #22e8ff);
-}
-.ph-7 img{object-fit: contain}
-.gallery-video-row{
-  max-width:1400px; margin: 0 auto 16px;
-  display:flex; justify-content:center;
-}
-.ph-video{
-  width: min(320px, 100%);
-  aspect-ratio: 9/16;
-  background: var(--ink-3);
-  flex-shrink: 0;
-}
-.ph-video iframe{
-  position:absolute; inset:0; width:100%; height:100%; border:0;
-}
-.ph-video-wide{
-  width: min(720px, 100%);
-  aspect-ratio: 16/9;
-  background: var(--ink-3);
-  flex-shrink: 0;
-}
-.ph-video-wide iframe{
-  position:absolute; inset:0; width:100%; height:100%; border:0;
-}
 
-/* ============ GALLERY CAROUSEL (mobile only) ============ */
-.gallery-carousel{display:none}
-.gc-track{
-  display:flex; gap:12px;
-  padding: 0 20px 20px;
+/* ============ GALLERY CAROUSELS ============ */
+.gc-wrap{max-width:1200px; margin:0 auto 48px}
+.gc-wrap:last-child{margin-bottom:0}
+.gc-section-label{
+  font-family:'Orbitron',sans-serif;
+  font-size:11px; letter-spacing:.28em; text-transform:uppercase;
+  color:var(--cyan); margin-bottom:16px;
 }
+.gallery-carousel{position:relative; overflow:hidden; border-radius:14px}
+.gc-track{
+  display:flex;
+  overflow-x:scroll; scroll-snap-type:x mandatory;
+  -webkit-overflow-scrolling:touch; scrollbar-width:none;
+}
+.gc-track::-webkit-scrollbar{display:none}
 .gc-slide{
-  scroll-snap-align: center;
-  flex-shrink: 0;
-  width: calc(100vw - 48px);
-  aspect-ratio: 4/3;
-  border-radius: 14px;
-  position: relative; overflow: hidden;
-  border: 1px solid rgba(255,255,255,.08);
-  background: var(--ink-3);
+  scroll-snap-align:start; flex-shrink:0; width:100%;
+  aspect-ratio:16/9; position:relative; overflow:hidden;
+  border-radius:14px;
+  border:1px solid rgba(255,255,255,.08); background:var(--ink-3);
 }
 .gc-slide img{
   position:absolute; inset:0; width:100%; height:100%;
   object-fit:cover; display:block;
 }
+.gc-slide iframe{position:absolute; inset:0; width:100%; height:100%; border:0}
 .gc-slide::after{
-  content:"";
-  position:absolute; inset:0;
-  background: linear-gradient(180deg, transparent 50%, rgba(5,1,15,.85) 100%);
+  content:""; position:absolute; inset:0;
+  background:linear-gradient(180deg,transparent 50%,rgba(5,1,15,.85) 100%);
   pointer-events:none;
 }
-.gc-slide-video{aspect-ratio: 9/16}
-.gc-slide-video iframe{position:absolute; inset:0; width:100%; height:100%; border:0}
+.gc-slide-contain img{object-fit:contain}
+.gc-arrow{
+  position:absolute; top:50%; transform:translateY(-50%); z-index:10;
+  background:rgba(5,1,15,.75); border:1px solid rgba(255,255,255,.2);
+  color:#fff; width:44px; height:44px; border-radius:50%;
+  font-size:28px; line-height:1; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  transition:background .2s, border-color .2s; opacity:.9;
+}
+.gc-arrow:hover{background:var(--pink); border-color:var(--pink); opacity:1}
+.gc-arrow:disabled{opacity:.25; pointer-events:none}
+.gc-prev{left:16px}
+.gc-next{right:16px}
 .gc-dots{
   display:flex; justify-content:center; gap:8px;
-  padding: 16px 0 4px;
+  padding:16px 0 4px;
 }
 .gc-dot{
   width:8px; height:8px; border-radius:50%;
-  background: rgba(255,255,255,.25);
-  border:0; padding:0; cursor:pointer;
-  transition: background .3s, transform .3s;
+  background:rgba(255,255,255,.25); border:0; padding:0; cursor:pointer;
+  transition:background .3s, transform .3s;
 }
-.gc-dot.active{background: var(--pink); transform: scale(1.35)}
+.gc-dot.active{background:var(--pink); transform:scale(1.35)}
 
 /* Fake band silhouette inside photo placeholders */
 .ph-silhouette{
@@ -993,15 +936,11 @@ footer{
   .song-inner{display:flex; flex-direction:column; gap:2px}
   .setlist-table.collapsed .song:nth-child(n+21){display:none}
   .setlist-more-wrap.has-more{display:flex; justify-content:center; margin-top: 24px}
-  .gallery-grid, .gallery-video-row{display:none}
-  .gallery-carousel{
-    display:block;
-    overflow-x:scroll;
-    scroll-snap-type: x mandatory;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-  }
-  .gallery-carousel::-webkit-scrollbar{display:none}
+  .gc-wrap{margin-bottom:32px}
+  .gallery-carousel{overflow:visible; border-radius:0}
+  .gc-track{gap:12px; padding:0 20px}
+  .gc-slide{width:calc(100vw - 48px); border-radius:14px}
+  .gc-arrow{display:none}
   .tg{grid-template-columns: 1fr; gap: 14px}
   .foot{grid-template-columns: 1fr 1fr; gap: 32px}
   .foot > div:first-child{grid-column: span 2}
@@ -1222,114 +1161,64 @@ footer{
     </div>
     <p class="lead">Momentos de los shows. Lo que pasa en la pista cuando arrancan los primeros acordes.</p>
   </div>
-  <div class="gallery-video-row">
-    <div class="ph ph-video">
-      <iframe
-        src="https://www.youtube.com/embed/959VbKscR90"
-        title="Artificios en vivo"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-        allowfullscreen
-        loading="lazy">
-      </iframe>
-      <div class="ph-label"><span>ARTIFICIOS · en vivo</span><span class="tag-sm">VIDEO</span></div>
+  <!-- VIDEOS CAROUSEL -->
+  <div class="gc-wrap">
+    <div class="gc-section-label">Videos</div>
+    <div class="gallery-carousel" id="gc-videos">
+      <div class="gc-track">
+        <div class="gc-slide">
+          <iframe src="https://www.youtube.com/embed/959VbKscR90" title="Artificios en vivo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen loading="lazy"></iframe>
+          <div class="ph-label"><span>ARTIFICIOS · en vivo</span><span class="tag-sm">VIDEO</span></div>
+        </div>
+        <div class="gc-slide">
+          <iframe src="https://www.youtube.com/embed/dIt_e-cLsaI" title="Artificios en vivo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen loading="lazy"></iframe>
+          <div class="ph-label"><span>ARTIFICIOS · en vivo</span><span class="tag-sm">VIDEO</span></div>
+        </div>
+      </div>
+      <button class="gc-arrow gc-prev" aria-label="Anterior">&#8249;</button>
+      <button class="gc-arrow gc-next" aria-label="Siguiente">&#8250;</button>
+      <div class="gc-dots"></div>
     </div>
-  </div>
-  <div class="gallery-video-row">
-    <div class="ph ph-video-wide">
-      <iframe
-        src="https://www.youtube.com/embed/dIt_e-cLsaI"
-        title="Artificios en vivo"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-        allowfullscreen
-        loading="lazy">
-      </iframe>
-      <div class="ph-label"><span>ARTIFICIOS · en vivo</span><span class="tag-sm">VIDEO</span></div>
-    </div>
-  </div>
-  <div class="gallery-grid">
-    <div class="ph ph-1">
-      <img src="assets/photo-marquee.jpg" alt="Artificios en vivo - marquee" loading="lazy" />
-      <div class="ph-label"><span>ARTIFICIOS · en vivo</span><span class="tag-sm">2026</span></div>
-    </div>
-    <div class="ph ph-2">
-      <img src="assets/photo-stage-crowd.jpg" alt="Artificios - pista llena" loading="lazy" />
-      <div class="ph-label"><span>Noche 80's · Pista llena</span><span class="tag-sm">2026</span></div>
-    </div>
-    <div class="ph ph-3">
-      <img src="assets/photo-keys-shades.jpg" alt="Artificios - tecladista" loading="lazy" />
-      <div class="ph-label"><span>Tecladista · Solo nocturno</span><span class="tag-sm">2026</span></div>
-    </div>
-    <div class="ph ph-4">
-      <img src="assets/photo-guitar-curly.jpg" alt="Artificios - guitarrista" loading="lazy" />
-      <div class="ph-label"><span>Guitarra · Vestuario retro</span><span class="tag-sm">2026</span></div>
-    </div>
-    <div class="ph ph-5">
-      <img src="assets/photo-singer.jpg" alt="Artificios - cantante" loading="lazy" />
-      <div class="ph-label"><span>Frontman · Show completo</span><span class="tag-sm">2026</span></div>
-    </div>
-    <div class="ph ph-6">
-      <img src="assets/photo-crowd.jpg" alt="Artificios - público filmando" loading="lazy" />
-      <div class="ph-label"><span>Público · Celulares al aire</span><span class="tag-sm">2026</span></div>
-    </div>
-    <div class="ph ph-7">
-      <img src="assets/photo-lawest-stage.jpg" alt="Artificios - La West show completo" loading="lazy" />
-      <div class="ph-label"><span>La West · Show completo</span><span class="tag-sm">2026</span></div>
-    </div>
-  </div>
   </div>
 
-  <!-- MOBILE CAROUSEL -->
-  <div class="gallery-carousel" id="gallery-carousel" aria-label="Galería">
-    <div class="gc-track">
-      <div class="gc-slide gc-slide-video">
-        <iframe
-          src="https://www.youtube.com/embed/959VbKscR90"
-          title="Artificios en vivo"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-          allowfullscreen loading="lazy">
-        </iframe>
-        <div class="ph-label"><span>ARTIFICIOS · en vivo</span><span class="tag-sm">VIDEO</span></div>
+  <!-- PHOTOS CAROUSEL -->
+  <div class="gc-wrap">
+    <div class="gc-section-label">Fotos</div>
+    <div class="gallery-carousel" id="gc-photos">
+      <div class="gc-track">
+        <div class="gc-slide">
+          <img src="assets/photo-marquee.jpg" alt="Artificios en vivo - marquee" loading="lazy" />
+          <div class="ph-label"><span>ARTIFICIOS · en vivo</span><span class="tag-sm">2026</span></div>
+        </div>
+        <div class="gc-slide">
+          <img src="assets/photo-stage-crowd.jpg" alt="Artificios - pista llena" loading="lazy" />
+          <div class="ph-label"><span>Noche 80's · Pista llena</span><span class="tag-sm">2026</span></div>
+        </div>
+        <div class="gc-slide">
+          <img src="assets/photo-keys-shades.jpg" alt="Artificios - tecladista" loading="lazy" />
+          <div class="ph-label"><span>Tecladista · Solo nocturno</span><span class="tag-sm">2026</span></div>
+        </div>
+        <div class="gc-slide">
+          <img src="assets/photo-guitar-curly.jpg" alt="Artificios - guitarrista" loading="lazy" />
+          <div class="ph-label"><span>Guitarra · Vestuario retro</span><span class="tag-sm">2026</span></div>
+        </div>
+        <div class="gc-slide">
+          <img src="assets/photo-singer.jpg" alt="Artificios - cantante" loading="lazy" />
+          <div class="ph-label"><span>Frontman · Show completo</span><span class="tag-sm">2026</span></div>
+        </div>
+        <div class="gc-slide">
+          <img src="assets/photo-crowd.jpg" alt="Artificios - público filmando" loading="lazy" />
+          <div class="ph-label"><span>Público · Celulares al aire</span><span class="tag-sm">2026</span></div>
+        </div>
+        <div class="gc-slide gc-slide-contain">
+          <img src="assets/photo-lawest-stage.jpg" alt="Artificios - La West show completo" loading="lazy" />
+          <div class="ph-label"><span>La West · Show completo</span><span class="tag-sm">2026</span></div>
+        </div>
       </div>
-      <div class="gc-slide" style="aspect-ratio:16/9">
-        <iframe
-          src="https://www.youtube.com/embed/dIt_e-cLsaI"
-          title="Artificios en vivo"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-          allowfullscreen loading="lazy"
-          style="position:absolute;inset:0;width:100%;height:100%;border:0">
-        </iframe>
-        <div class="ph-label"><span>ARTIFICIOS · en vivo</span><span class="tag-sm">VIDEO</span></div>
-      </div>
-      <div class="gc-slide">
-        <img src="assets/photo-marquee.jpg" alt="Artificios en vivo - marquee" loading="lazy" />
-        <div class="ph-label"><span>ARTIFICIOS · en vivo</span><span class="tag-sm">2026</span></div>
-      </div>
-      <div class="gc-slide">
-        <img src="assets/photo-stage-crowd.jpg" alt="Artificios - pista llena" loading="lazy" />
-        <div class="ph-label"><span>Noche 80's · Pista llena</span><span class="tag-sm">2026</span></div>
-      </div>
-      <div class="gc-slide">
-        <img src="assets/photo-keys-shades.jpg" alt="Artificios - tecladista" loading="lazy" />
-        <div class="ph-label"><span>Tecladista · Solo nocturno</span><span class="tag-sm">2026</span></div>
-      </div>
-      <div class="gc-slide">
-        <img src="assets/photo-guitar-curly.jpg" alt="Artificios - guitarrista" loading="lazy" />
-        <div class="ph-label"><span>Guitarra · Vestuario retro</span><span class="tag-sm">2026</span></div>
-      </div>
-      <div class="gc-slide">
-        <img src="assets/photo-singer.jpg" alt="Artificios - cantante" loading="lazy" />
-        <div class="ph-label"><span>Frontman · Show completo</span><span class="tag-sm">2026</span></div>
-      </div>
-      <div class="gc-slide">
-        <img src="assets/photo-crowd.jpg" alt="Artificios - público filmando" loading="lazy" />
-        <div class="ph-label"><span>Público · Celulares al aire</span><span class="tag-sm">2026</span></div>
-      </div>
-      <div class="gc-slide">
-        <img src="assets/photo-lawest-stage.jpg" alt="Artificios - La West show completo" loading="lazy" />
-        <div class="ph-label"><span>La West · Show completo</span><span class="tag-sm">2026</span></div>
-      </div>
+      <button class="gc-arrow gc-prev" aria-label="Anterior">&#8249;</button>
+      <button class="gc-arrow gc-next" aria-label="Siguiente">&#8250;</button>
+      <div class="gc-dots"></div>
     </div>
-    <div class="gc-dots" id="gc-dots"></div>
   </div>
 </section>
 
@@ -1692,36 +1581,58 @@ document.addEventListener('keydown', e => { if(e.key === 'Escape') setNav(false)
 </script>
 
 <script>
-// Gallery carousel dot indicators
+// Gallery carousels — dots + arrow buttons
 (function(){
-  const carousel = document.getElementById('gallery-carousel');
-  const dotsEl   = document.getElementById('gc-dots');
-  if (!carousel || !dotsEl) return;
-  const slides = Array.from(carousel.querySelectorAll('.gc-slide'));
-  const dots = slides.map((_, i) => {
-    const btn = document.createElement('button');
-    btn.className = 'gc-dot' + (i === 0 ? ' active' : '');
-    btn.setAttribute('aria-label', 'Foto ' + (i + 1));
-    btn.addEventListener('click', () =>
-      slides[i].scrollIntoView({ behavior:'smooth', block:'nearest', inline:'center' })
-    );
-    dotsEl.appendChild(btn);
-    return btn;
-  });
-  let ticking = false;
-  carousel.addEventListener('scroll', () => {
-    if (ticking) return;
-    ticking = true;
-    requestAnimationFrame(() => {
-      const mid = carousel.scrollLeft + carousel.clientWidth / 2;
-      let closest = 0, minDist = Infinity;
-      slides.forEach((s, i) => {
-        const dist = Math.abs(s.offsetLeft + s.offsetWidth / 2 - mid);
-        if (dist < minDist) { minDist = dist; closest = i; }
+  document.querySelectorAll('.gallery-carousel').forEach(function(carousel){
+    var track  = carousel.querySelector('.gc-track');
+    var dotsEl = carousel.querySelector('.gc-dots');
+    var slides = Array.from(carousel.querySelectorAll('.gc-slide'));
+    var prev   = carousel.querySelector('.gc-prev');
+    var next   = carousel.querySelector('.gc-next');
+    if (!track || !slides.length) return;
+
+    function currentIdx(){
+      var mid = track.scrollLeft + track.clientWidth / 2;
+      var closest = 0, minDist = Infinity;
+      slides.forEach(function(s, i){
+        var dist = Math.abs(s.offsetLeft + s.offsetWidth / 2 - mid);
+        if (dist < minDist){ minDist = dist; closest = i; }
       });
-      dots.forEach((d, i) => d.classList.toggle('active', i === closest));
-      ticking = false;
+      return closest;
+    }
+
+    function goTo(i){
+      track.scrollTo({ left: slides[i].offsetLeft, behavior: 'smooth' });
+    }
+
+    // Build dots
+    var dots = dotsEl ? slides.map(function(_, i){
+      var btn = document.createElement('button');
+      btn.className = 'gc-dot' + (i === 0 ? ' active' : '');
+      btn.setAttribute('aria-label', 'Slide ' + (i + 1));
+      btn.addEventListener('click', function(){ goTo(i); });
+      dotsEl.appendChild(btn);
+      return btn;
+    }) : [];
+
+    function update(){
+      var idx = currentIdx();
+      dots.forEach(function(d, i){ d.classList.toggle('active', i === idx); });
+      if (prev) prev.disabled = idx === 0;
+      if (next) next.disabled = idx === slides.length - 1;
+    }
+
+    var ticking = false;
+    track.addEventListener('scroll', function(){
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(function(){ update(); ticking = false; });
     });
+
+    if (prev) prev.addEventListener('click', function(){ goTo(Math.max(0, currentIdx() - 1)); });
+    if (next) next.addEventListener('click', function(){ goTo(Math.min(slides.length - 1, currentIdx() + 1)); });
+
+    update();
   });
 })();
 </script>
