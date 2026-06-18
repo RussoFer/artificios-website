@@ -720,6 +720,15 @@ section{padding: clamp(80px, 12vw, 140px) clamp(20px, 5vw, 72px); position:relat
 .ph-video iframe{
   position:absolute; inset:0; width:100%; height:100%; border:0;
 }
+.ph-video-wide{
+  width: min(720px, 100%);
+  aspect-ratio: 16/9;
+  background: var(--ink-3);
+  flex-shrink: 0;
+}
+.ph-video-wide iframe{
+  position:absolute; inset:0; width:100%; height:100%; border:0;
+}
 
 /* ============ GALLERY CAROUSEL (mobile only) ============ */
 .gallery-carousel{display:none}
@@ -1225,6 +1234,18 @@ footer{
       <div class="ph-label"><span>ARTIFICIOS · en vivo</span><span class="tag-sm">VIDEO</span></div>
     </div>
   </div>
+  <div class="gallery-video-row">
+    <div class="ph ph-video-wide">
+      <iframe
+        src="https://www.youtube.com/embed/dIt_e-cLsaI"
+        title="Artificios en vivo"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        allowfullscreen
+        loading="lazy">
+      </iframe>
+      <div class="ph-label"><span>ARTIFICIOS · en vivo</span><span class="tag-sm">VIDEO</span></div>
+    </div>
+  </div>
   <div class="gallery-grid">
     <div class="ph ph-1">
       <img src="assets/photo-marquee.jpg" alt="Artificios en vivo - marquee" loading="lazy" />
@@ -1266,6 +1287,16 @@ footer{
           title="Artificios en vivo"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
           allowfullscreen loading="lazy">
+        </iframe>
+        <div class="ph-label"><span>ARTIFICIOS · en vivo</span><span class="tag-sm">VIDEO</span></div>
+      </div>
+      <div class="gc-slide" style="aspect-ratio:16/9">
+        <iframe
+          src="https://www.youtube.com/embed/dIt_e-cLsaI"
+          title="Artificios en vivo"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowfullscreen loading="lazy"
+          style="position:absolute;inset:0;width:100%;height:100%;border:0">
         </iframe>
         <div class="ph-label"><span>ARTIFICIOS · en vivo</span><span class="tag-sm">VIDEO</span></div>
       </div>
